@@ -1,0 +1,41 @@
+<?PHP
+/*
+ * Thanks go to VJ <meetthevj@gmail.com> for this include snippet
+ */
+// determine Sentora root directory
+$currentDir = rtrim(dirname(__FILE__), '/\\');
+$folders = explode('/', $currentDir);
+$sentoraRoot = '';
+$i = 0;
+while ($folders[$i] != 'modules') {
+	$sentoraRoot .= $folders[$i].'/';
+	$i++;
+}
+require_once $sentoraRoot.'dryden/loader.inc.php';
+require_once $sentoraRoot.'cnf/db.php';
+require_once $sentoraRoot.'inc/dbc.inc.php';
+require_once $sentoraRoot.'dryden/db/driver.class.php';
+require_once $sentoraRoot.'dryden/ctrl/options.class.php';
+require_once $sentoraRoot.'dryden/sys/versions.class.php';
+/*
+ * End Includes
+ */
+
+function RemoveSystemOption($name) {
+	global $zdbh;
+	if(ctrl_options::GetSystemOption($name) === FALSE) {
+		return true;
+	}
+
+	$bindArray = array(
+		':name' => $name,
+	);
+	$zdbh->bindQuery("DELETE FROM x_settings WHERE so_name_vc = :name", $bindArray);
+}
+
+//remove the options we created
+RemoveSystemOption('whmcs_reported');
+RemoveSystemOption('whmcs_sendemail_bo');
+RemoveSystemOption('whmcs_link');
+
+?>

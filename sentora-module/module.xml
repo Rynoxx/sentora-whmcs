@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+	<name>WHMCS</name>
+	<version>003</version>
+	<type></type>
+	<defaultcat>Server Admin</defaultcat>
+	<desc>WHMCS is a licensed billing system.</desc>
+	<authorname>Rynoxx</authorname>
+	<authoremail>rynoxx@grid-servers.net</authoremail>
+	<authorurl>https://github.com/rynoxx</authorurl>
+	<updateurl>http://zppy.grid-servers.net/whmcs.xml</updateurl>
+</module>
