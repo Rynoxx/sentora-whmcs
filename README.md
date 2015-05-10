@@ -35,8 +35,9 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 
 1. Download the whmcs.zip from your the WHMCS module in your Sentora panel Located here: `http://url.toyoursentora.tld/?module=whmcs`
 2. Extract it to the root directory of your WHMCS installation, e.g.
-	> /home/username/public_html/billing/ (cPanel has this folder structure, in this case billing is the directory where you installed WHMCS)
-	> /var/sentora/hostdata/username/public_html/domainname/ (Sentora has this folder structure, in this case WHMCS installed directly to the domain root)
+> /home/username/public_html/billing/ (cPanel has this folder structure, in this case billing is the directory where you installed WHMCS)  
+> /var/sentora/hostdata/username/public_html/domainname/ (Sentora has this folder structure, in this case WHMCS installed directly to the domain root)  
+
 3. In the WHMCS admin panel, navigate to "Setup" -> "Product/Services" -> "Servers" and add a new server
 	1. Set the IP Address of the server to the domainname you use to access your Sentora installation (and if you're running a port which isn't 80 (for non HTTPS) or 443 (for SSL))
 
