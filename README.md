@@ -12,14 +12,14 @@ WHMCS Module: [Mathieu L�gar�](mailto:levelkro@yahoo.ca)
 ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ### Additions/Edits for Sentora ###
-[Rynoxx](https://github.com/rynoxx)
+[Rynoxx](https://github.com/rynoxx)  
 _Do note that currently I've basicly only tested it and renamed variables and edited comments_
 
 - - -
 
 ## Installation instructions ##
 
-### Sentora: ###
+### Sentora ###
 1. Add the repository to your Sentora installation and install the module using the following commands:
 ```
 	zppy repo add https://zppy.grid-servers.net
@@ -29,7 +29,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://example.com/?module=moduleadmin`
 3. Configure the WHMCS module according to the form on the module page `http://example.com/?module=whmcs`
 
-### WHMCS: ###
+### WHMCS ###
 
 1. Download the whmcs.zip from your the WHMCS module in your Sentora panel Located here: `http://url.toyoursentora.tld/?module=whmcs`
 2. Extract it to the root directory of your WHMCS installation, e.g.
@@ -46,3 +46,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found in the MySQL database in sentora_core.x_settings
 
 	5. Tick the "Secure" box if you want WHMCS to connect to your server using HTTPS instead of HTTP
+
+## License ##
+
+This work is licensed under the [GPL-V3 License](LICENSE)
