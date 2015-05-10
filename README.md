@@ -1,0 +1,48 @@
+# README #
+- - -
+# sentora-whmcs
+A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS
+
+
+WHMCS Module tested on version 5.3.12 and 5.3.13, OS: CentOS 6.5
+Sentora Module tested on Sentora 1.0.0, OS: CentOS 7
+
+
+## Credits ##
+
+### Original version(s) ###
+WHMCS Module: [Mathieu L�gar�](mailto:levelkro@yahoo.ca)
+ZPanel Module: [Knivey](https://github.com/knivey/)
+
+### Additions/Edits for Sentora ###
+[Rynoxx](https://github.com/rynoxx)
+_Do note that currently I've basicly only tested it and renamed variables and edited comments_
+
+- - -
+
+## Installation instructions ##
+
+### Sentora: ###
+1. Add the repository to your Sentora installation and install the module using the following commands:
+```
+
+	zppy repo add https://zppy.grid-servers.net
+	zppy update
+	zppy install whmcs
+
+```
+2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://example.com/?module=moduleadmin`
+3. Configure the WHMCS module according to the form on the module page `http://example.com/?module=whmcs`
+
+### WHMCS: ###
+
+1. Download the whmcs.zip from your the WHMCS module in your Sentora panel Located here: `http://example.com/?module=whmcs`
+2. Extract it to the root directory of your WHMCS installation, e.g.
+	> /home/username/public_html/billing/ (cPanel has this folder structure, in this case billing is the directory where you installed WHMCS)
+	> /var/sentora/hostdata/username/public_html/domainname/ (Sentora has this folder structure, in this case WHMCS installed directly to the domain root)
+3. In the WHMCS admin panel, navigate to "Setup" -> "Product/Services" -> "Servers" and add a new server
+	1. Set the IP Address of the server to the domainname you use to access your Sentora installation (and if you're running a port which isn't 80 (for non HTTPS) or 443 (for SSL))
+
+	2. Set the Server Status Address to "http://url.to.sentora.com/modules/whmcs/assets/status.php" where example.com should be replaced by the domain (or IP) of your Sentora installation (And replace http with https if you're running a secure server)
+
+	3. 
