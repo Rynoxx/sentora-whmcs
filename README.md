@@ -1,14 +1,15 @@
 # README #
 _A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS_
 
-WHMCS Module tested on version 5.3.12 and 5.3.13, OS: CentOS 6.5
-Sentora Module tested on Sentora 1.0.0, OS: CentOS 7
+WHMCS Module tested on version 5.3.12 and 5.3.13, OS: CentOS 6.5  
+Sentora Module tested on Sentora 1.0.0, OS: CentOS 7  
+Status page tested on Windows 7 running WAMP and CentOS 7 running Sentora
 
 
 ## Credits ##
 
 ### Original version(s) ###
-WHMCS Module: [Mathieu L�gar�](mailto:levelkro@yahoo.ca)
+WHMCS Module: [Mathieu L�gar�](mailto:levelkro@yahoo.ca)  
 ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ### Additions/Edits for Sentora ###
@@ -20,14 +21,14 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 ## Installation instructions ##
 
 ### Sentora ###
-1. Add the repository to your Sentora installation and install the module using the following commands:
+1. Add the repository to your Sentora installation and install the module using the following terminal commands:  
 ```
 	zppy repo add https://zppy.grid-servers.net
 	zppy update
 	zppy install whmcs
 ```
-2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://example.com/?module=moduleadmin`
-3. Configure the WHMCS module according to the form on the module page `http://example.com/?module=whmcs`
+2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://url.toyoursentora.tld/?module=moduleadmin`
+3. Configure the WHMCS module according to the form on the module page `http://url.toyoursentora.tld/?module=whmcs`
 
 ### WHMCS ###
 
@@ -46,6 +47,13 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found in the MySQL database in sentora_core.x_settings
 
 	5. Tick the "Secure" box if you want WHMCS to connect to your server using HTTPS instead of HTTP
+
+### Updating the module ###
+To update the Sentora module enter the following command to your terminal:  
+```
+	zppy upgrade whmcs
+```  
+To update the WHMCS module repeat the first two steps of the installation
 
 ## License ##
 
