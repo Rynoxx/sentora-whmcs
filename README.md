@@ -1,5 +1,6 @@
 # README #
-_A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS_
+_A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS_  
+_These modules allow WHMCS to create users, suspend, unsuspend, terminate, change password and change packages on Sentora_
 
 WHMCS Module tested on version 5.3.12 and 5.3.13, OS: CentOS 6.5  
 Sentora Module tested on Sentora 1.0.0, OS: CentOS 7  
@@ -23,7 +24,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 ### Sentora ###
 1. Add the repository to your Sentora installation and install the module using the following terminal commands:  
 ```
-	zppy repo add https://zppy.grid-servers.net
+	zppy repo add http://zppy.grid-servers.net
 	zppy update
 	zppy install whmcs
 ```
