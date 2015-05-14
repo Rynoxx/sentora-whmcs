@@ -24,7 +24,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 ### Sentora ###
 1. Add the repository to your Sentora installation and install the module using the following terminal commands:  
 ```
-	zppy repo add http://zppy.grid-servers.net
+	zppy repo add zppy.grid-servers.net
 	zppy update
 	zppy install whmcs
 ```
