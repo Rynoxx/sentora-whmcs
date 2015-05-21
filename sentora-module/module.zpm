@@ -6,69 +6,90 @@
 	<@ Result @>
 	
 	<% if IsAdmin %>
-	<% if BadVersionIsSet %>
-	<div class="zannounceerror" id="zannounceerror">
-		<p><strong>WARNING!!!</strong>WHMCS has reported that its version (Version: <@ BadVersion @> that does not match the Sentora module's (Version: <@ Version @>) If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!</p>
-	</div>
-	<% endif %>
+		<% if BadVersionIsSet %>
+			<div class="zannounceerror" id="zannounceerror">
+				<p>
+					<strong>WARNING!!!</strong> WHMCS has reported that its version (Version: <@ BadVersion @>) that does not match the Sentora modules (Version: <@ Version @>)!<br>
+					If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!
+				</p>
+			</div>
+		<% endif %>
 
-	<div class="zform_wrapper">
-		<form action="./?module=whmcs&action=UpdateSettings" method="post">
-			<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
-			<h2>Admin Settings</h2>
-			<table class="zform">
-				<tr>
-					<th>Setting</th>
-					<th>Value</th>
-					<th>Description</th>
-				</tr>
-				<tr>
-					<td>SendEmail</td>
-					<td>
-						<@ SendEmailForm @>
-					</td>
-					<td><p>Should Sentora send your admin users emails about important issues like version conflicts?</p></td>
-				</tr>
-				<tr>
-					<td>WHMCS Login Link</td>
-					<td>
-						<@ WHMCSLinkForm @>
-					</td>
-					<td><p>The link to your WHMCS login/clientarea page</p></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<button class="fg-button ui-state-default ui-corner-all" type="submit" ><: Save :></button>
-					</td>
-					<td></td>
-				</tr>
-			</table>
-			<@ CSFR_Tag @>
-		</form>
-	</div>
-	<a href="<@ WHMCSModule @>">Download WHMCS Module</a>
-	<p>
-		After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area.<br />
-		For your API key you may look at your mysql (should be under sentora_core.x_settings), or install gatekeeper module from zpanel forums (Seems like there currently isn't one for Sentora).<br />
-		Put 1,apikey (1 is the reseller id for zadmin) in the whmcs server config.<br />
-		Anytime WHMCS accesses Sentora it will tell Sentora its current module version and a notice will be generated if the versions aren't matching. It is up to you to update your WHMCS module when updating Sentora module.
-	</p>
+		<div class="zform_wrapper">
+			<form action="./?module=whmcs&action=UpdateSettings" method="post">
+				<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
+				<h2>Admin Settings</h2>
+				<table class="zform">
+					<tr>
+						<th>Setting</th>
+						<th>Value</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>SendEmail</td>
+						<td>
+							<@ SendEmailForm @>
+						</td>
+						<td><p>Should Sentora send your admin users emails about important issues like version conflicts?</p></td>
+					</tr>
+					<tr>
+						<td>WHMCS Login Link</td>
+						<td>
+							<@ WHMCSLinkForm @>
+						</td>
+						<td><p>The link to your WHMCS login/clientarea page</p></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+							<button class="fg-button ui-state-default ui-corner-all" type="submit" ><: Save :></button>
+						</td>
+						<td></td>
+					</tr>
+				</table>
+				<@ CSFR_Tag @>
+			</form>
+		</div>
+		<a href="<@ WHMCSModule @>">Download WHMCS Module</a>
+		<p>
+			After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area.<br />
+			Put 1,apikey (1 is the reseller id for zadmin) in the whmcs server config.<br />
+			Your API-Key can be revealed by pressing the button below (Do note that only admins can see this part of the page)<br />
+			Anytime WHMCS accesses Sentora it will tell Sentora its current module version and a notice will be generated if the versions aren't matching. It is up to you to update your WHMCS module when updating Sentora module.
+		</p>
+		<pre id="api-key" style="display:none; border: 1px"><@ CurrentAPIKey @></pre>
+		<button onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;">Toggle API-Key visibility</button><br>
+		<a href="<@ WHMCSLink @>/admin">Login to WHMCS</a>
+	<% else %>
+		<a href="<@ WHMCSLink @>/clientarea.php">Login to WHMCS</a>
 	<% endif %>
-	<a href="<@ WHMCSLink @>/admin">Login to WHMCS</a>
 </div>
 <script type="text/javascript">
 	<!--
+	function toggle_div_visibility(id){
+		var e = document.getElementById(id);
+
+		if(e.style.display == 'block'){
+			e.style.display = 'none';
+		}
+		else{
+			e.style.display = 'block';
+		}
+	}
+
 	function show_div(id) {
 		var e = document.getElementById(id);
-		if(e.style.display == 'none')
+		if(e.style.display == 'none'){
 			e.style.display = 'block';
+		}
 	}
 
 	function hide_div(id) {
 		var e = document.getElementById(id);
-		if(e.style.display == 'block')
+		if(e.style.display == 'block'){
 			e.style.display = 'none';
+		}
 	}
 	//-->
 </script>
+

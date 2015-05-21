@@ -31,27 +31,91 @@
  * 	- Fix error message
  * 	- Added Change Password
  * 	- Added Change Package
- *  1.1.2
+ *  1.2
  *  - Testing it in Sentora
  *	- Doing some minor changes
  *		- Editing variable names
  *		- Editing comments
  *	- Updated XMWS
+ *	1.3
+ *	- Changed API to "Senitor"
+ *	- Added API key to WHMCS module
+ *	- Allowing Sentora theme to change the Icon of the WHMCS module section (In Sentora)
+ *		- Credits & Source: Ron-e https://github.com/sentora/sentora-core/commit/b88b1295db03cff536b33eebb865f0fa69e783ce
  */
 
-//	Load the PHP XMWS API Client by ballen (ballen@zpanelcp.com) 
-require 'xmwsclient.class.php';
+// Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
+//					Currently the CSRF Token is invalid, even if gotten from the server through API.
+
+//	Load the Senitor by ballen (https://github.com/bobsta63/senitor)
+//require 'xmwsclient.class.php';
+// use Ballen\Senitor\SenitorFactory;
+require_once 'lib/senitor/vendor/autoload.php';
+use Ballen\Senitor\SenitorFactory;
+use Ballen\Senitor\Entities\MessageBag;
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
 /*
-  // How to send query to Sentora
-  $xmws = new xmwsclient();
-  $xmws->InitRequest(url,module_name,function,apikey,adminuser,adminpass);
-  $xmws->SetRequestData(xml_data);
-  $response_array  = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+	// How to send query to Sentora
+	$response = sendSenitorRequest($params, $module, $endpoint, $array_data);
+
+	// logModuleCall("Sentora", $action, $requeststring, $responsedata, $processeddata, $replacevars);
 */
+
+$xmws = null;
 
 function getProtocol($params) {
 	return ($params["serversecure"] ? "https://" : "http://");
+}
+
+function getAddress($params){
+	$protocol = getProtocol($params);
+	$url = empty($params['serverhostname']) ? $params['serverip'] : $params['serverhostname'];
+
+	return $protocol . $url;
+}
+
+function getUserID($params){
+	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"], "version" => getModuleVersion()]);
+
+	$resp_arr = $response->asArray();
+	$uid = $resp_arr["uid"];
+
+	return $uid;
+}
+
+function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
+	global $xmws;
+
+	$serveraccesshash = explode(",", $params["serveraccesshash"]);
+	$server_apikey = $serveraccesshash[1]; # Get the API Key
+
+	$resp = null;
+
+	if($xmws == null){
+		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], ['verify' => false]);
+	}
+
+	try{
+		// Workaround for an exception caused by having multiple Senitor requests per PHP page.
+		MessageBag::getInstance()->reset();
+	}
+	catch(Exception $e){ }
+
+	try{
+		$xmws->setModule($module);
+		$xmws->setEndpoint($endpoint);
+		$xmws->SetRequestData($array_data);
+
+		$resp = $xmws->send();
+	}
+	catch(Exception $e){
+		echo '<p>Caught exception: </p>', "<pre>", $e->getMessage(), "\n\n";
+		echo $e->getTraceAsString(), "\n</pre>";
+	}
+
+	return $resp;
 }
 
 function sentora_ConfigOptions() {
@@ -60,34 +124,30 @@ function sentora_ConfigOptions() {
 		"package_name" => array("FriendlyName" => "Package Name", "Type" => "text", "Size" => "25", "Description" => "The name of the package in Sentora"),
 		"reseller" => array("FriendlyName" => "Reseller", "Type" => "yesno", "Description" => "Yes, is a reseller"),
 	);
+
 	return $configarray;
 }
 
+function getModuleVersion(){
+	$sentora_module_version = '103';
+}
+
 function sendVersionToSentora($params) {
-	$sentora_module_version = '003';
-	$serverip = $params["serverip"];									# Server IP address
-	$serverusername = $params["serverusername"];						# Server username
-	$serverpassword = $params["serverpassword"];						# Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_apikey = $serveraccesshash[1];								# Get the API Key
-	$serversecure = $params["serversecure"];							# If set, SSL Mode is enabled in the server config
-	
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "checkVersion");
-	$data = "<version>" . $sentora_module_version . "</version>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$pass = $response_array['xmws']['content']['pass'];
-	if($pass == 'true') {
-		return true;
+	$array_data = array("version" => getModuleVersion());
+
+	$response = sendSenitorRequest($params, "whmcs", "checkVersion", $array_data);
+
+	if($response != null){
+		return $response->asString() == "true";
 	}
-	else {
+	else{
 		return false;
 	}
+
+	//logModuleCall("Sentora", $response->asString(), "", $response->asString(), $response->asString(), "");
 }
 
 function sentora_CreateAccount($params) {
-	sendVersionToSentora($params);
 	// Create account, used by the automation system and manual button
 	// Account details
 	$producttype = $params["producttype"];   # Product Type: hostingaccount, reselleraccount, server or other
@@ -104,64 +164,61 @@ function sentora_CreateAccount($params) {
 	}
 
 	// Server details
-	$serverip = $params["serverip"];   # Server IP address
-	$serverusername = $params["serverusername"]; # Server username
-	$serverpassword = $params["serverpassword"]; # Server password
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
-	$server_apikey = $serveraccesshash[1];  # Get the API Key
-	$serversecure = $params["serversecure"];   # If set, SSL Mode is enabled in the server config
 
 	//CreateClient Checks if that username exists and creates it, otherwise returns a failure
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "CreateClient");
-	$data = "<resellerid>" . $server_reseller . "</resellerid>\n";
-	$data .= "<packageid>" . $configoption1 . "</packageid>\n";
-	$data .= "<groupid>" . $groupid . "</groupid>\n";
-	$data .= "<username>" . $username . "</username>\n";
-	$data .= "<fullname>" . $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "</fullname>\n";
-	$data .= "<email>" . $clientsdetails['email'] . "</email>\n";
-	$data .= "<address>" . $clientsdetails['address1'] . "</address>\n";
-	$data .= "<postcode>" . $clientsdetails['postcode'] . "</postcode>\n";
-	$data .= "<password>" . $password . "</password>\n";
-	$data .= "<phone>" . $clientsdetails['phonenumber'] . "</phone>\n";
-	$data .= "<sendmail>0</sendmail>\n";
-	$data .= "<emailsubject>0</emailsubject>\n";
-	$data .= "<emailbody>0</emailbody>";
-	$xmws->SetRequestData($data);
+	$data = array(
+		"resellerid" => $server_reseller,
+		"packageid" => $configoption1,
+		"groupid" => $groupid,
+		"username" => $username,
+		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'],
+		"email" => $clientsdetails["email"],
+		"address" => $clientsdetails["address1"],
+		"postcode" => $clientsdetails["postcode"],
+		"password" => $password,
+		"phone" => $clientsdetails["phonenumber"],
+		"sendmail" => 0,
+		"emailsubject" => 0,
+		"emailbody" => 0,
+		"version" => getModuleVersion()
+	);
 
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$xmws_values = $response_array['xmws'];
+	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
 
 	// If it returns anything except 'success' then the user already exists
-	if ($xmws_values['content'] != 'success') {
-		return $xmws_values['content'];
+	if($response == null){
+		return "Account couldn't be created, the API Request failed.";
 	}
-	
+
+	if ($response->asString() != 'success') {
+		return $response->asString();
+	}
+
+	$response = null;
+
 	$result = 'success';
-	
+
 	// Now add the domain (if setup in WHMCS)
 	// This is a guess but i think if no domain is set it will be null?
 	if($domain != null) {
-		$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-		$xmws->SetRequestType("whmcs", "getUserId");
-		$data = "<username>" . $username . "</username>\n";
-		$xmws->SetRequestData($data);
-		$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-		$uid = $response_array['xmws']['content']['uid'];
+		$uid = getUserID($params);
+
 		if(empty($uid)) {
 			return "Account Created?, error getting uid for domain setup.";
 		}
-		
-		$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-		$xmws->SetRequestType("domains", "CreateDomain");
-		$data = "<uid>" . $uid . "</uid>\n";
-		$data .= "<domain>" . $domain . "</domain>\n";
-		$data .= "<destination> </destination>\n";
-		$data .= "<autohome>1</autohome>";
-		$xmws->SetRequestData($data);
-		$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-		$content = $response_array['xmws']['content'];
+
+		$response = sendSenitorRequest($params, "whmcs", "getUserId",
+			[
+				"uid" => $uid,
+				"domain" => $domain,
+				"destination" => " ",
+				"autohome" => 1,
+				"version" => getModuleVersion()
+			]);
+
+		$content = $response->asArray();
 
 		if ($content['created'] == "false") {
 			$result = "Account created, but can't add the domain (FQDN Must not already exist).";
@@ -172,151 +229,108 @@ function sentora_CreateAccount($params) {
 }
 
 function sentora_TerminateAccount($params) {
-	sendVersionToSentora($params);
-	// Requested user details for the task
-	$username = $params["username"];       # Username defined in the product
-	// Requested server details for the task
-	$serverip = $params["serverip"];       # Server IP address
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
-	
 	//Get the UID
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "getUserId");
-	$data = "<username>" . $username . "</username>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$uid = $response_array['xmws']['content']['uid'];
+	$uid = getUserID($params);
+
 	if (empty($uid)) {
 		return "Error getting the UID";
 	}
 
-	// Starting to Suspend the user to zPanel
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("manage_clients", "DeleteClient");
-	$data = "<uid>" . $uid . "</uid>";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$content = $response_array['xmws']['content'];
+	// Starting to Terminate the user to Sentora
+	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "version" => getModuleVersion()]);
+
+	$content = $response->asArray();
 	// If disabled return true, is done!
 	if ($content['deleted'] == "true") {
 		$result = "success";
 	} else {
 		$result = "User account is not deleted.";
 	}
+
 	return $result;
 }
 
 function sentora_SuspendAccount($params) {
-	sendVersionToSentora($params);
-	// Requested user details for the task
-	$username = $params["username"];       # Username defined in the product
-	// Requested server details for the task
-	$serverip = $params["serverip"];       # Server IP address
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
-
 	//Get the UID
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "getUserId");
-	$data = "<username>" . $username . "</username>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$uid = $response_array['xmws']['content']['uid'];
+	$uid = getUserID($params);
+
 	if (empty($uid)) {
 		return "Error getting the UID";
 	}
 
-	// Starting to Suspend the user to zPanel
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("manage_clients", "DisableClient");
-	$data = "<uid>" . $uid . "</uid>";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$content = $response_array['xmws']['content'];
+	// Starting to Suspend the user to Sentora
+	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid, "version" => getModuleVersion()]);
+
+	$content = $response->asArray();
+
 	// If disabled return true, is done!
 	if ($content['disabled'] == "true") {
 		$result = "success";
 	} else {
 		$result = "User account is not suspended.";
 	}
+
 	return $result;
 }
 
 function sentora_UnsuspendAccount($params) {
-	sendVersionToSentora($params);
-	// Requested user details for the task
-	$username = $params["username"];       # Username defined in the product
-	// Requested server details for the task
-	$serverip = $params["serverip"];       # Server IP address
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
-	
+	// sendVersionToSentora($params);
+
 	//Get the UID
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "getUserId");
-	$data = "<username>" . $username . "</username>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$uid = $response_array['xmws']['content']['uid'];
+	$uid = getUserID($params);
+
 	if (empty($uid)) {
 		return "Error getting the UID";
 	}
-	
-	// Starting to Suspend the user to zPanel
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("manage_clients", "EnableClient");
-	$data = "<uid>" . $uid . "</uid>";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$content = $response_array['xmws']['content'];
+
+	// Starting to Suspend the user to Sentora
+	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid, "version" => getModuleVersion()]);
+
+	$content = $response->asArray();
+
 	// If enabled return true, is done!
 	if ($content['enabled'] == "true") {
 		$result = "success";
 	} else {
 		$result = "User account is not unsuspended.";
 	}
+
 	return $result;
 }
 
 function sentora_ChangePassword($params) {
-	sendVersionToSentora($params);
+	// sendVersionToSentora($params);
 	// Account details
 	$username = $params["username"];       # Username defined in the product
 	$password = $params["password"];       # Password defined in the product
 	// Server details
-	$serverip = $params["serverip"];       # Server IP address
 	$serverusername = $params["serverusername"];    # Server username
 	$serverpassword = $params["serverpassword"];    # Server password
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];      # Get the Reseller ID
 	$server_apikey = $serveraccesshash[1];      # Get the API Key
-	$serversecure = $params["serversecure"];      # If set, SSL Mode is enabled in the server config
+
 	// Reset the password
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "ResetUserPassword");
-	$data = "<username>" . $username . "</username>\n";
-	$data .= "<newpassword>" . $password . "</newpassword>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$content = $response_array['xmws']['content'];
+	$response = sendSenitorRequest($params, "whmcs", "ResetUserPassword", [
+			"username" => $username,
+			"password" => $password,
+			"version" => getModuleVersion()]
+		);
+
+	$content = $response->asArray();
+
 	// If reset returns true, is a success
 	if ($content['reset'] == "true") {
 		$result = "success";
 	} else {
 		$result = "Can't change the password for the user.";
 	}
+
 	return $result;
 }
 
 function sentora_ChangePackage($params) {
-	sendVersionToSentora($params);
+	// sendVersionToSentora($params);
 	// Create account, used by the automation system and manual button
 	// Account details
 	$producttype = $params["producttype"];       # Product Type: hostingaccount, reselleraccount, server or other
@@ -333,63 +347,67 @@ function sentora_ChangePackage($params) {
 	}
 
 	// Server details
-	$serverip = $params["serverip"];       # Server IP address
 	$serverusername = $params["serverusername"];    # Server username
 	$serverpassword = $params["serverpassword"];    # Server password
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];      # Get the Reseller ID
 	$server_apikey = $serveraccesshash[1];      # Get the API Key
-	$serversecure = $params["serversecure"];      # If set, SSL Mode is enabled in the server config
-	
+
 	//Get the UID
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "getUserId");
-	$data = "<username>" . $username . "</username>\n";
-	$xmws->SetRequestData($data);
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$uid = $response_array['xmws']['content']['uid'];
+	$uid = getUserID($params);
+
 	if (empty($uid)) {
 		return "Error getting the UID";
 	}
-	
-	// Starting to update account on zPanel
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("whmcs", "UpdateClient");
-	$data = "<packageid>" . $configoption1 . "</packageid>\n";
-	$data .= "<groupid>" . $groupid . "</groupid>\n";
-	$data .= "<uid>" . $uid . "</uid>\n";
-	$data .= "<fullname>" . $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "</fullname>\n";
-	$data .= "<email>" . $clientsdetails['email'] . "</email>\n";
-	$data .= "<address>" . $clientsdetails['address1'] . "</address>\n";
-	$data .= "<postcode>" . $clientsdetails['postcode'] . "</postcode>\n";
-	$data .= "<password>" . $password . "</password>\n";
-	$data .= "<phone>" . $clientsdetails['phonenumber'] . "</phone>\n";
-	$xmws->SetRequestData($data);
 
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$xmws_values = $response_array['xmws'];
-	return $xmws_values['content'];
+	// Starting to update account on Sentora
+	$data = array(
+		"packageid" => $configoption1,
+		"groupid" => $groupid,
+		"uid" => $uid,
+		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "</fullname>",
+		"email" => $clientsdetails['email'],
+		"address" => $clientsdetails['address1'],
+		"postcode" => $clientsdetails['postcode'],
+		"password" => $password,
+		"phone" => $clientsdetails['phonenumber'],
+		"version" => getModuleVersion()
+	);
+
+	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);
+
+	$response_array = $response->asArray();
+	return $response_array;
 }
 
 function sentora_ClientArea($params) {
-	$code = '<form action="http://' . $params["serverip"] . '/" method="get" target="_blank">'
-		/*<input type="hidden" name="inUsername" value="' . htmlentities($params["username"]) . '" />
-        <input type="hidden" name="inPassword" value="' . htmlentities($params["password"]) . '" /> */ . '
-		<input type="button" value="Login to Control Panel" onClick="window.open(\'http://' . $params['serverip'] . '/\')" />
-		<input type="button" value="Login to Webmail" onClick="window.open(\'http://' . $params['serverip'] . '/etc/apps/webmail/\')" />
+	sendVersionToSentora($params);
+	
+	/*$response = sendSenitorRequest($params, "whmcs", "getCSRFToken", ["auto-login-enabled" => $params["configoption3"] == "on"]);
+
+	$arr = $response->asArray();*/
+
+	$code = '<form action="' . getAddress($params) . '/" method="post" target="_blank" name="sentoraform">' . /*
+		'<input type="hidden" name="inUsername" value="' . htmlentities($params["username"]) . '" />' .
+		'<input type="hidden" name="inPassword" value="' . htmlentities($params["password"]) . '" />' . 
+		$arr["csrf_token"] . //*/
+		'<input type="button" onClick="window.open(\'' . getAddress($params) . '/\')" value="Login to Control Panel" />
+		<input type="button" value="Login to Webmail" onClick="window.open(\'' . getAddress($params) . '/etc/apps/webmail/\')" />
 	</form>';
+
 	return $code;
 }
 
 function sentora_AdminLink($params) {
-	$code = '<form action="http://' . $params["serverip"] . '/" method="get" target="_blank">
-		<input type="submit" value="Login to Control Panel" onClick="window.open(\'http://' . $params['serverip'] . '/\')" />
+	$code = '<form action="' . getAddress($params) . '/" method="get" target="_blank">
+		<input type="submit" value="Login to Control Panel" onClick="window.open(\'' . getAddress($params) . '/\')" />
 	</form>';
+
 	return $code;
 }
 
 function sentora_LoginLink($params) {
-	echo '<a href="http://' . $params["serverip"] . '/" target="_blank" style="color:#cc0000">Login to control panel</a>';
+	echo '<a href="' . getAddress($params) . '/" target="_blank" style="color:#cc0000">Login to Control Panel</a>';
 }
 
 function sentora_reboot($params) {
@@ -417,16 +435,16 @@ function sentora_extrapage($params) {
 function sentora_UsageUpdate($params) {
 	sendVersionToSentora($params);
 	// Server details
-	$serverip = $params["serverip"];       # Server IP address
-	$serverid = $params["serverid"];       # Server IP address
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
+	$serverip = $params["serverip"];				# Server IP address
+	$serverid = $params["serverid"];				# Server IP address
+	$serverusername = $params["serverusername"];	# Server username
+	$serverpassword = $params["serverpassword"];	# Server password
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_reseller = $serveraccesshash[0];      # Get the Reseller ID
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
-	$serversecure = $params["serversecure"];      # If set, SSL Mode is enabled in the server config
+	$server_reseller = $serveraccesshash[0];		# Get the Reseller ID
+	$server_apikey = $serveraccesshash[1];			# Get the API Key
+	$serversecure = $params["serversecure"];		# If set, SSL Mode is enabled in the server config
 	// Starting to update account on Sentora
-	$xmws = new xmwsclient(getProtocol($params) . $serverip, $server_apikey, $serverusername, $serverpassword);
+	$xmws = new xmwsclient(getAddress($params), $server_apikey, $serverusername, $serverpassword);
 	$xmws->SetRequestType("manage_clients", "GetAllClients");
 	$xmws->SetRequestData('');
 	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
