@@ -42,14 +42,15 @@
  *	- Added API key to WHMCS module
  *	- Allowing Sentora theme to change the Icon of the WHMCS module section (In Sentora)
  *		- Credits & Source: Ron-e https://github.com/sentora/sentora-core/commit/b88b1295db03cff536b33eebb865f0fa69e783ce
+ *	1.3.1
+ *	- Fixed UsageUpdate, forgot to make it use Senitor instead of the old XMWS API
+ *	- Changed version, now the version will be more correct in relation to semantic versioning [SemVer.org](http://semver.org)
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
 //					Currently the CSRF Token is invalid, even if gotten from the server through API.
 
 //	Load the Senitor by ballen (https://github.com/bobsta63/senitor)
-//require 'xmwsclient.class.php';
-// use Ballen\Senitor\SenitorFactory;
 require_once 'lib/senitor/vendor/autoload.php';
 use Ballen\Senitor\SenitorFactory;
 use Ballen\Senitor\Entities\MessageBag;
@@ -59,8 +60,6 @@ use Ballen\Senitor\Entities\MessageBag;
 /*
 	// How to send query to Sentora
 	$response = sendSenitorRequest($params, $module, $endpoint, $array_data);
-
-	// logModuleCall("Sentora", $action, $requeststring, $responsedata, $processeddata, $replacevars);
 */
 
 $xmws = null;
@@ -129,7 +128,7 @@ function sentora_ConfigOptions() {
 }
 
 function getModuleVersion(){
-	$sentora_module_version = '103';
+	$sentora_module_version = '104';
 }
 
 function sendVersionToSentora($params) {
@@ -435,22 +434,11 @@ function sentora_extrapage($params) {
 function sentora_UsageUpdate($params) {
 	sendVersionToSentora($params);
 	// Server details
-	$serverip = $params["serverip"];				# Server IP address
-	$serverid = $params["serverid"];				# Server IP address
-	$serverusername = $params["serverusername"];	# Server username
-	$serverpassword = $params["serverpassword"];	# Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_reseller = $serveraccesshash[0];		# Get the Reseller ID
-	$server_apikey = $serveraccesshash[1];			# Get the API Key
-	$serversecure = $params["serversecure"];		# If set, SSL Mode is enabled in the server config
-	// Starting to update account on Sentora
-	$xmws = new xmwsclient(getAddress($params), $server_apikey, $serverusername, $serverpassword);
-	$xmws->SetRequestType("manage_clients", "GetAllClients");
-	$xmws->SetRequestData('');
-	$response_array = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$xmws_values = $response_array['xmws'];
-	$xmws_clients = $xmws_values['content']['client'];
-	
+
+	$response = sendSenitorRequest($params, "manage_clients", "GetAllClients", []); // $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+	$xmws_values = $response->asArray();
+	$xmws_clients = $xmws_values['client'];
+
 	/*
 	 * NOTICE In the whmcs api doc disklimit is shown as dislimit in mysql it is really disklimit
 	 * also diskused is really diskusage

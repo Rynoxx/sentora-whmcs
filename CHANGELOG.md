@@ -21,3 +21,7 @@
 - Added API key to WHMCS module
 - Allowing Sentora theme to change the Icon of the WHMCS module section (In Sentora)
 	- Credits & Source: Ron-e https://github.com/sentora/sentora-core/commit/b88b1295db03cff536b33eebb865f0fa69e783ce
+
+## 1.3.1 ##
+- Fixed UsageUpdate, forgot to make it use Senitor instead of the old xmws API
+- Changed version, now the version will be more correct in relation to semantic versioning [SemVer.org](http://semver.org)

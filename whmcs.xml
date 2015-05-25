@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <updateserver>
-    <latestversion>103</latestversion>
+    <latestversion>131</latestversion>
     <downloadurl>http://zppy.grid-servers.net/whmcs.zpp</downloadurl>
 </updateserver>
