@@ -128,7 +128,7 @@ function sentora_ConfigOptions() {
 }
 
 function getModuleVersion(){
-	$sentora_module_version = '104';
+	$sentora_module_version = '131';
 }
 
 function sendVersionToSentora($params) {
