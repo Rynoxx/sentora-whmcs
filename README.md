@@ -46,7 +46,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 	3. Set the nameservers to whichever points to your sentora installation
 		* Often something like ns1.example.com and ns2.example.com
 
-	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found in the MySQL database in sentora_core.x_settings
+	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found on the WHMCS module page in Sentora.
 
 	5. Tick the "Secure" box if you want WHMCS to connect to your server using HTTPS instead of HTTP
 
