@@ -25,3 +25,7 @@
 ## 1.3.1 ##
 - Fixed UsageUpdate, forgot to make it use Senitor instead of the old xmws API
 - Changed version, now the version will be more correct in relation to semantic versioning [SemVer.org](http://semver.org)
+
+## 1.3.2 ##
+- Fixed the module.zpm to match the proper HTML structure
+- Changed default icon size to 35
