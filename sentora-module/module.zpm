@@ -45,7 +45,7 @@
 					<tr>
 						<td></td>
 						<td>
-							<button class="fg-button ui-state-default ui-corner-all" type="submit" ><: Save :></button>
+							<button class="btn btn-primary" type="submit" ><: Save :></button>
 						</td>
 						<td></td>
 					</tr>
@@ -60,11 +60,14 @@
 			Your API-Key can be revealed by pressing the button below (Do note that only admins can see this part of the page)<br />
 			Anytime WHMCS accesses Sentora it will tell Sentora its current module version and a notice will be generated if the versions aren't matching. It is up to you to update your WHMCS module when updating Sentora module.
 		</p>
-		<pre id="api-key" style="display:none; border: 1px"><@ CurrentAPIKey @></pre>
-		<button onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;">Toggle API-Key visibility</button><br>
-		<a href="<@ WHMCSLink @>/admin">Login to WHMCS</a>
+
+		<pre id="api-key" style="display:none; padding: 8px; margin-top: 4px;"><@ CurrentAPIKey @></pre>
+
+		<button class="btn btn-primary" style="margin-top: 4px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;">Toggle API-Key visibility</button><br>
+		<br>
+		<a href="<@ WHMCSLink @>/admin" class="btn btn-primary">Login to WHMCS</a>
 	<% else %>
-		<a href="<@ WHMCSLink @>/clientarea.php">Login to WHMCS</a>
+		<a href="<@ WHMCSLink @>/clientarea.php" class="btn btn-primary">Login to WHMCS</a>
 	<% endif %>
 </div>
 <script type="text/javascript">
