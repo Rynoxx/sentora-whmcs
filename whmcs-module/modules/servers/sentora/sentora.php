@@ -45,6 +45,10 @@
  *	1.3.1
  *	- Fixed UsageUpdate, forgot to make it use Senitor instead of the old XMWS API
  *	- Changed version, now the version will be more correct in relation to semantic versioning [SemVer.org](http://semver.org)
+ *
+ *	1.3.2
+ *	- Fixed the module.zpm to match the proper HTML structure
+ *	- Changed default icon size to 35
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -64,6 +68,10 @@ use Ballen\Senitor\Entities\MessageBag;
 
 $xmws = null;
 
+function getModuleVersion(){
+	return '132';
+}
+
 function getProtocol($params) {
 	return ($params["serversecure"] ? "https://" : "http://");
 }
@@ -76,7 +84,7 @@ function getAddress($params){
 }
 
 function getUserID($params){
-	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"], "version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"], "whmcs_version" => getModuleVersion()]);
 
 	$resp_arr = $response->asArray();
 	$uid = $resp_arr["uid"];
@@ -91,6 +99,10 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
 
 	$resp = null;
+
+	if(empty($array_data["whmcs_version"])){
+		$array_data["whmcs_version"] = getModuleVersion();
+	}
 
 	if($xmws == null){
 		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], ['verify' => false]);
@@ -127,12 +139,8 @@ function sentora_ConfigOptions() {
 	return $configarray;
 }
 
-function getModuleVersion(){
-	$sentora_module_version = '131';
-}
-
 function sendVersionToSentora($params) {
-	$array_data = array("version" => getModuleVersion());
+	$array_data = array("whmcs_version" => getModuleVersion());
 
 	$response = sendSenitorRequest($params, "whmcs", "checkVersion", $array_data);
 
@@ -181,7 +189,7 @@ function sentora_CreateAccount($params) {
 		"sendmail" => 0,
 		"emailsubject" => 0,
 		"emailbody" => 0,
-		"version" => getModuleVersion()
+		"whmcs_version" => getModuleVersion()
 	);
 
 	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
@@ -214,7 +222,7 @@ function sentora_CreateAccount($params) {
 				"domain" => $domain,
 				"destination" => " ",
 				"autohome" => 1,
-				"version" => getModuleVersion()
+				"whmcs_version" => getModuleVersion()
 			]);
 
 		$content = $response->asArray();
@@ -236,7 +244,7 @@ function sentora_TerminateAccount($params) {
 	}
 
 	// Starting to Terminate the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
 
 	$content = $response->asArray();
 	// If disabled return true, is done!
@@ -258,7 +266,7 @@ function sentora_SuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid, "version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
 
 	$content = $response->asArray();
 
@@ -283,7 +291,7 @@ function sentora_UnsuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid, "version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
 
 	$content = $response->asArray();
 
@@ -313,7 +321,7 @@ function sentora_ChangePassword($params) {
 	$response = sendSenitorRequest($params, "whmcs", "ResetUserPassword", [
 			"username" => $username,
 			"password" => $password,
-			"version" => getModuleVersion()]
+			"whmcs_version" => getModuleVersion()]
 		);
 
 	$content = $response->asArray();
@@ -360,7 +368,7 @@ function sentora_ChangePackage($params) {
 	}
 
 	// Starting to update account on Sentora
-	$data = array(
+	$data = [
 		"packageid" => $configoption1,
 		"groupid" => $groupid,
 		"uid" => $uid,
@@ -370,8 +378,8 @@ function sentora_ChangePackage($params) {
 		"postcode" => $clientsdetails['postcode'],
 		"password" => $password,
 		"phone" => $clientsdetails['phonenumber'],
-		"version" => getModuleVersion()
-	);
+		"whmcs_version" => getModuleVersion()
+	];
 
 	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);
 

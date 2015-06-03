@@ -64,10 +64,10 @@ class webservice extends ws_xmws {
 	function checkVersion($whmcs_version = null) {
 		$version = module_controller::getVersion();
 
-		if($whmcs_version == null){
+		if(empty($whmcs_version)){
 			$request_data = $this->XMLDataToArray($this->wsdata);
 			$ctags = $request_data['xmws']['content'];
-			$whmcs_version = $ctags['version'];
+			$whmcs_version = $ctags['whmcs_version'];
 		}
 
 		$dataobject = new runtime_dataobject();
