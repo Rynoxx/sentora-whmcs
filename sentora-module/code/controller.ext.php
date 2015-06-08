@@ -25,8 +25,11 @@ class module_controller {
 
 		// Allows the theme to change the WHMCS icon
 		// Credits & Source: Ron-e https://github.com/sentora/sentora-core/commit/b88b1295db03cff536b33eebb865f0fa69e783ce
-		if (file_exists(ui_tpl_assetfolderpath::Template() . 'img/misc/whmcs.png')) {
-			$module_icon = ui_tpl_assetfolderpath::Template() . 'img/misc/whmcs.png';
+		if (file_exists(ui_tpl_assetfolderpath::Template() . 'images/' . $controller->GetControllerRequest('URL', 'module') . '/assets/icon.png')) {
+			$module_icon = ui_tpl_assetfolderpath::Template() . 'images/' . $controller->GetControllerRequest('URL', 'module') . '/assets/icon.png';
+		}
+		elseif(file_exists(ui_tpl_assetfolderpath::Template() . 'img/' . $controller->GetControllerRequest('URL', 'module') . '/assets/icon.png')){
+			$module_icon = ui_tpl_assetfolderpath::Template() . 'img/' . $controller->GetControllerRequest('URL', 'module') . '/assets/icon.png';
 		}
 
 		return $module_icon;
@@ -111,7 +114,7 @@ class module_controller {
 		}
 		ctrl_options::SetSystemOption('whmcs_sendemail_bo', $form['SendEmail']);
 		ctrl_options::SetSystemOption('whmcs_link', $form['Link']);
-		self::$Results[] = ui_sysmessage::shout('Settings updated!', 'znotice', 'znotice');
+		self::$Results[] = ui_sysmessage::shout('Settings updated!', 'alert-success');
 	}
 
 	/**
@@ -188,7 +191,7 @@ class module_controller {
 		$sql = 'select ac_email_vc from x_accounts where ac_group_fk = 1';
 		$stmt = $zdbh->query($sql);
 		$addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		
+
 		$phpmailer = new sys_email();
 		$phpmailer->Subject = "Sentora - WHMCS Version Mismatch";
 		$phpmailer->Body = "This Email is to warn you that the versions of your WHMCS module (Version: $version)"

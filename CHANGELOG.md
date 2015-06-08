@@ -29,3 +29,8 @@
 ## 1.3.2 ##
 - Fixed the module.zpm to match the proper HTML structure
 - Changed default icon size to 35
+
+## 1.3.3 ##
+- Updated the module page
+	- Using the new Sentora notice manager for the warning message and the "Settings updated" message
+	- Using the proper button classes for the buttons

@@ -10,12 +10,26 @@
 	
 	<% if IsAdmin %>
 		<% if BadVersionIsSet %>
-			<div class="zannounceerror" id="zannounceerror">
-				<p>
-					<strong>WARNING!!!</strong> WHMCS has reported that its version (Version: <@ BadVersion @>) that does not match the Sentora modules (Version: <@ Version @>)!<br>
-					If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!
-				</p>
-			</div>
+			<div id="whmcs-version-mismatch" style="display: none;"></div>
+			<script>
+				var msgString = "<strong>Warning:</strong> WHMCS has reported that it's version is <@ BadVersion @>, which doesn't match the version of the sentora module (<@ Version @>)!<br>If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!";
+				if(typeof Sentora != "undefined"){
+					Sentora.notice.show({
+						type:"warning",
+						selector: "#whmcs-version-mismatch",
+						closeButton: true,
+						autoClose: false,
+						closeTime: 0,
+						message: msgString
+					});
+				}
+				else{
+					document.getElementById("whmcs-version-mismatch").innerHTML = msgString;
+					document.getElementById("whmcs-version-mismatch").className = "alert alert-block alert-warning";
+				}
+
+				document.getElementById("whmcs-version-mismatch").style.display = "block";
+			</script>
 		<% endif %>
 
 		<div class="zform_wrapper">

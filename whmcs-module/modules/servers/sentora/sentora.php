@@ -49,6 +49,12 @@
  *	1.3.2
  *	- Fixed the module.zpm to match the proper HTML structure
  *	- Changed default icon size to 35
+ *
+ *	1.3.3
+ *	- Updated the module page
+ *		- Using the new Sentora notice manager for the warning message and the "Settings updated" message
+ *		- Using the proper button classes for the buttons
+ *
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -69,7 +75,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '132';
+	return '133';
 }
 
 function getProtocol($params) {
