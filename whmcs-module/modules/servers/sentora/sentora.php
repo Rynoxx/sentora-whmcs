@@ -55,6 +55,8 @@
  *		- Using the new Sentora notice manager for the warning message and the "Settings updated" message
  *		- Using the proper button classes for the buttons
  *
+ *	1.3.4
+ *	- Added support for the WHMCS debugging system
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -75,7 +77,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '133';
+	return '134';
 }
 
 function getProtocol($params) {
@@ -90,7 +92,7 @@ function getAddress($params){
 }
 
 function getUserID($params){
-	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"], "whmcs_version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"]]);
 
 	$resp_arr = $response->asArray();
 	$uid = $resp_arr["uid"];
@@ -120,6 +122,8 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	}
 	catch(Exception $e){ }
 
+	$replacevars = array("serveraccesshash", "serverusername", "serverpassword", "password");
+
 	try{
 		$xmws->setModule($module);
 		$xmws->setEndpoint($endpoint);
@@ -128,9 +132,14 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		$resp = $xmws->send();
 	}
 	catch(Exception $e){
-		$str_error = date("yyyy-mm-dd HH:ii:ss") . ": Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
-		file_put_contents("sentora_module_error.txt", $str_error, FILE_APPEND);
+		$str_error = date("Y-m-d H:i:s") . "\nCaught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
+
+		logModuleCall("Sentora", $endpoint, $array_data, $str_error, "", $replacevars);
+
+		return null;
 	}
+
+	logModuleCall("Sentora", $endpoint, $array_data, $resp->asArray(), "", $replacevars);
 
 	return $resp;
 }
@@ -194,8 +203,7 @@ function sentora_CreateAccount($params) {
 		"phone" => $clientsdetails["phonenumber"],
 		"sendmail" => 0,
 		"emailsubject" => 0,
-		"emailbody" => 0,
-		"whmcs_version" => getModuleVersion()
+		"emailbody" => 0
 	);
 
 	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
@@ -227,8 +235,7 @@ function sentora_CreateAccount($params) {
 				"uid" => $uid,
 				"domain" => $domain,
 				"destination" => " ",
-				"autohome" => 1,
-				"whmcs_version" => getModuleVersion()
+				"autohome" => 1
 			]);
 
 		$content = $response->asArray();
@@ -250,7 +257,7 @@ function sentora_TerminateAccount($params) {
 	}
 
 	// Starting to Terminate the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid]);
 
 	$content = $response->asArray();
 	// If disabled return true, is done!
@@ -272,7 +279,7 @@ function sentora_SuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid]);
 
 	$content = $response->asArray();
 
@@ -297,7 +304,7 @@ function sentora_UnsuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid, "whmcs_version" => getModuleVersion()]);
+	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid]);
 
 	$content = $response->asArray();
 
@@ -326,9 +333,8 @@ function sentora_ChangePassword($params) {
 	// Reset the password
 	$response = sendSenitorRequest($params, "whmcs", "ResetUserPassword", [
 			"username" => $username,
-			"password" => $password,
-			"whmcs_version" => getModuleVersion()]
-		);
+			"password" => $password
+		]);
 
 	$content = $response->asArray();
 
@@ -383,8 +389,7 @@ function sentora_ChangePackage($params) {
 		"address" => $clientsdetails['address1'],
 		"postcode" => $clientsdetails['postcode'],
 		"password" => $password,
-		"phone" => $clientsdetails['phonenumber'],
-		"whmcs_version" => getModuleVersion()
+		"phone" => $clientsdetails['phonenumber']
 	];
 
 	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);

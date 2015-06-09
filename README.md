@@ -60,3 +60,8 @@ To update the WHMCS module repeat the first two steps of the installation
 ## License ##
 
 This work is licensed under the [GPL-V3 License](LICENSE)
+
+### What to do when errors occur ###
+* Enable module debug logging in WHMCS (located under Utilities > Logs > Module Log)
+* Do the API call you attempted to do (e.g. create the user/accept order, unsuspend/suspend etc)
+* Post on the Sentora forum and tag me in the post (By typing `@[Rynoxx]`) include the problem and the output of the WHMCS debug log

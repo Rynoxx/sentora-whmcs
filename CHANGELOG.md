@@ -34,3 +34,6 @@
 - Updated the module page
 	- Using the new Sentora notice manager for the warning message and the "Settings updated" message
 	- Using the proper button classes for the buttons
+
+## 1.3.4 ##
+- Added support for the WHMCS debugging system
