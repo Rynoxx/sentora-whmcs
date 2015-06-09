@@ -128,8 +128,8 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		$resp = $xmws->send();
 	}
 	catch(Exception $e){
-		echo '<p>Caught exception: </p>', "<pre>", $e->getMessage(), "\n\n";
-		echo $e->getTraceAsString(), "\n</pre>";
+		$str_error = date("yyyy-mm-dd HH:ii:ss") . ": Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
+		file_put_contents("sentora_module_error.txt", $str_error, FILE_APPEND);
 	}
 
 	return $resp;
