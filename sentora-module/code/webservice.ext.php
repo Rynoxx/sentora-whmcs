@@ -78,11 +78,11 @@ class webservice extends ws_xmws {
 			$alreadyReported = ctrl_options::GetSystemOption('whmcs_reported');
 			if ($alreadyReported == 'false') {
 				//if so theWn update database
-				ctrl_options::SetSystemOption('whmcs_reported', $ctags['version']);
+				ctrl_options::SetSystemOption('whmcs_reported', $ctags['whmcs_version']);
 				//then send email to admins if possible
 				$sendemail = ctrl_options::GetSystemOption('whmcs_sendemail_bo');
 				if ($sendemail == 'true') {
-					module_controller::sendBadVersionMail($ctags['version']);
+					module_controller::sendBadVersionMail($ctags['whmcs_version']);
 				}
 			}
 		} else {

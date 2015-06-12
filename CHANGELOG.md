@@ -37,3 +37,8 @@
 
 ## 1.3.4 ##
 - Added support for the WHMCS debugging system
+
+## 1.3.5 ##
+- Fixed version warning message
+- Fixed created users not being put into the right usergroup (Reseller, not reseller)
+- Fixed domains not being created in Sentora

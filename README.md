@@ -2,7 +2,7 @@
 _A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS_  
 _These modules allow WHMCS to create users, suspend, unsuspend, terminate, change password and change packages on Sentora_
 
-WHMCS Module tested on version 5.3.12 and 5.3.13, OS: CentOS 6.5  
+WHMCS Module tested on version 5.3.12, 5.3.13 and 5.3.14, OS: CentOS 6.5  
 Sentora Module tested on Sentora 1.0.0, OS: CentOS 7  
 Status page tested on Windows 7 running WAMP and CentOS 7 running Sentora
 
@@ -45,6 +45,7 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 
 	3. Set the nameservers to whichever points to your sentora installation
 		* Often something like ns1.example.com and ns2.example.com
+		* Do note that cloudflare has nameserver hostnames that are more similar to hank.ns.cloudflare.com and ivy.ns.cloudflare.com
 
 	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found on the WHMCS module page in Sentora.
 

@@ -5,7 +5,7 @@
  *	Originally written by Mathieu L�gar� (levelkro@yahoo.ca)
  *	Edits written by Rynoxx (rynoxx@grid-servers.net)
  *	Uses the PHP XMWS API Client by ballen (ballen@zpanelcp.com)
- *	Tested with WHMCS 5.1.3, Sentora 1.0 and CentOS 7
+ *	Tested with WHMCS 5.3.13 & 5.3.14, Sentora 1.0 and CentOS 7
  *
  *
  * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE PREVIOUS AUTHOR(S)
@@ -57,6 +57,11 @@
  *
  *	1.3.4
  *	- Added support for the WHMCS debugging system
+ *
+ * 1.3.5
+ *	- Fixed version warning message
+ *	- Fixed created users not being put into the right usergroup (Reseller, not reseller)
+ *	- Fixed domains not being created in Sentora
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -77,7 +82,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '134';
+	return '135';
 }
 
 function getProtocol($params) {
@@ -132,7 +137,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		$resp = $xmws->send();
 	}
 	catch(Exception $e){
-		$str_error = date("Y-m-d H:i:s") . "\nCaught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
+		$str_error = "Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
 
 		logModuleCall("Sentora", $endpoint, $array_data, $str_error, "", $replacevars);
 
@@ -181,9 +186,11 @@ function sentora_CreateAccount($params) {
 	$configoption1 = $params["configoption1"];  # Package name
 	$configoption2 = $params["configoption2"];  # If is Reseller
 	$groupid = "3"; # Default to Client no need to have an else statement for this.
-	if ($configoption2 == "yes" || strpos($producttype, "reseller") >= 0){
+	if ($configoption2 === "on" || stripos($producttype, "reseller") !== false){
 		$groupid = "2";
 	}
+
+	logModuleCall("Sentora", "CreateAccount", $params);
 
 	// Server details
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
@@ -230,7 +237,7 @@ function sentora_CreateAccount($params) {
 			return "Account Created?, error getting uid for domain setup.";
 		}
 
-		$response = sendSenitorRequest($params, "whmcs", "getUserId",
+		$response = sendSenitorRequest($params, "domains", "CreateDomain",
 			[
 				"uid" => $uid,
 				"domain" => $domain,

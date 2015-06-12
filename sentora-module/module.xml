@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 	<name>WHMCS</name>
-	<version>134</version>
+	<version>135</version>
 	<type></type>
 	<defaultcat>Server Admin</defaultcat>
 	<desc>WHMCS is a licensed billing system.</desc>

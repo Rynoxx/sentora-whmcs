@@ -7,7 +7,7 @@
 	</div>
 
 	<@ Result @>
-	
+
 	<% if IsAdmin %>
 		<% if BadVersionIsSet %>
 			<div id="whmcs-version-mismatch" style="display: none;"></div>
