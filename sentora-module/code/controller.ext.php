@@ -261,6 +261,7 @@ class module_controller {
 	 */
 	static function getUserExists($username) {
 		global $zdbh;
+		$username = is_array($username) ? implode($username) : $username;
 		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM x_accounts WHERE ac_user_vc=:uname AND ac_deleted_ts is NULL");
 		$stmt->bindValue(":uname", $username);
 		$stmt->execute();
