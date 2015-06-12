@@ -261,8 +261,9 @@ class module_controller {
 	 */
 	static function getUserExists($username) {
 		global $zdbh;
-		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM x_accounts WHERE ac_user_vc=? AND ac_deleted_ts is NULL");
-		$stmt->execute(Array($username));
+		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM x_accounts WHERE ac_user_vc=:uname AND ac_deleted_ts is NULL");
+		$stmt->bindValue(":uname", $username);
+		$stmt->execute();
 		$res = $stmt->fetch(PDO::FETCH_ASSOC);
 		if ($res['COUNT(*)'] > 0) {
 			return true;
