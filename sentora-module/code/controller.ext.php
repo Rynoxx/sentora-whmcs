@@ -274,6 +274,7 @@ class module_controller {
 	static function ExecuteCreateClient($uid, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password, $sendemail, $emailsubject, $emailbody) {
 		global $zdbh;
 		// Check for spaces and remove if found...
+		$username = is_array($username) ? implode($username) : $username;
 		$username = strtolower(str_replace(' ', '', $username));
 		$reseller = ctrl_users::GetUserDetail($uid);
 		
