@@ -210,15 +210,18 @@ class module_controller {
 	 */
 	static function getUserId($name) {
 		global $zdbh;
-		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM `x_accounts` WHERE `ac_user_vc`=? AND ac_deleted_ts is NULL");
-		$stmt->execute(array($name));
+		$name = is_array($name) ? implode($name) : $name;
+		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM `x_accounts` WHERE `ac_user_vc`=:uname AND ac_deleted_ts is NULL");
+		$stmt->bindValue(":uname", $name);
+		$stmt->execute();
 		$rows = $stmt->fetch(PDO::FETCH_ASSOC);
 		$numrows = $rows['COUNT(*)'];
 		if ($numrows == 0) {
 			return false;
 		} else {
-			$stmt = $zdbh->prepare("SELECT `ac_id_pk` FROM `x_accounts` WHERE `ac_user_vc`=? AND ac_deleted_ts is NULL");
-			$stmt->execute(array($name));
+			$stmt = $zdbh->prepare("SELECT `ac_id_pk` FROM `x_accounts` WHERE `ac_user_vc`=:uname AND ac_deleted_ts is NULL");
+			$stmt->bindValue(":uname", $name);
+			$stmt->execute();
 			$rowpack = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $rowpack['ac_id_pk'];
 		}
@@ -279,10 +282,7 @@ class module_controller {
 		$username = is_array($username) ? implode($username) : $username;
 		$username = strtolower(str_replace(' ', '', $username));
 		$reseller = ctrl_users::GetUserDetail($uid);
-		
-		//convert package to numerical id if needed
-		if(!is_numeric($packageid)) $packageid=self::getPackageIdFix($packageid);
-		
+
 		// Check for errors before we continue...
 		if (fs_director::CheckForEmptyValue(self::CheckCreateForErrors($username, $packageid, $groupid, $email, $password))) {
 			return false;
@@ -294,12 +294,12 @@ class module_controller {
 		$randomsalt = $crypto->RandomSalt();
 		$crypto->SetSalt($randomsalt);
 		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
-		$time = time();
 
 		// No errors found, so we can add the user to the database...
 		$sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts) VALUES (
 			:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :uid, :time)");
 		$sql->bindParam(':uid', $uid);
+		$time = time();
 		$sql->bindParam(':time', $time);
 		$sql->bindParam(':username', $username);
 		$sql->bindParam(':password', $secure_password);
@@ -325,6 +325,7 @@ class module_controller {
 		$sql->bindParam(':address', $address);
 		$sql->bindParam(':postcode', $post);
 		$sql->bindParam(':phone', $phone);
+		$time = time();
 		$sql->bindParam(':time', $time);
 		$sql->execute();
 		// Now we add an entry into the bandwidth table, for the user for the upcoming month.
@@ -340,14 +341,20 @@ class module_controller {
 		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html", 0777);
 		fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups");
 		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups", 0777);
-		// Send the user account details via. email (if requested)... 
+		// Send the user account details via. email (if requested)...
 		if ($sendemail <> 0) {
+			if (isset($_SERVER['HTTPS'])) {
+				$protocol = 'https://';
+			} else {
+				$protocol = 'http://';
+			}
 			$emailsubject = str_replace("{{username}}", $username, $emailsubject);
 			$emailsubject = str_replace("{{password}}", $password, $emailsubject);
 			$emailsubject = str_replace("{{fullname}}", $fullname, $emailsubject);
 			$emailbody = str_replace("{{username}}", $username, $emailbody);
 			$emailbody = str_replace("{{password}}", $password, $emailbody);
 			$emailbody = str_replace("{{fullname}}", $fullname, $emailbody);
+			$emailbody = str_replace('{{controlpanelurl}}', $protocol . ctrl_options::GetSystemOption('sentora_domain'), $emailbody);
 
 			$phpmailer = new sys_email();
 			$phpmailer->Subject = $emailsubject;
@@ -440,6 +447,7 @@ class module_controller {
 
 	static function CheckCreateForErrors($username, $packageid, $groupid, $email, $password = "") {
 		global $zdbh;
+		$username = is_array($username) ? implode($username) : $username;
 		$username = strtolower(str_replace(' ', '', $username));
 		// Check to make sure the username is not blank or exists before we go any further...
 		if (!fs_director::CheckForEmptyValue($username)) {
@@ -537,15 +545,19 @@ class module_controller {
 
 	static function getPackageIdFix($name) {
 		global $zdbh;
-		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM `x_packages` WHERE `pk_name_vc`=? AND pk_deleted_ts IS NULL");
-		$stmt->execute(array($name));
+		$name = is_array($name) ? implode($name) : $name;
+
+		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM `x_packages` WHERE `pk_name_vc`=:name AND pk_deleted_ts IS NULL");
+		$stmt->bindValue(":name", $name);
+		$stmt->execute();
 		$rows = $stmt->fetch(PDO::FETCH_ASSOC);
 		$numrows = $rows['COUNT(*)'];
 		if ($numrows == 0) {
 			return false;
 		} else {
-			$stmt = $zdbh->prepare("SELECT * FROM `x_packages` WHERE `pk_name_vc`=? AND pk_deleted_ts IS NULL");
-			$stmt->execute(array($name));
+			$stmt = $zdbh->prepare("SELECT * FROM `x_packages` WHERE `pk_name_vc`=:name AND pk_deleted_ts IS NULL");
+			$stmt->bindValue(":name", $name);
+			$stmt->execute();
 			$rowpack = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $rowpack['pk_id_pk'];
 		}

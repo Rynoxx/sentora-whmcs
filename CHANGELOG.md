@@ -1,5 +1,10 @@
 # Changelog #
 
+## 1.3.6 ##
+- Fixed various bugs occuring on windows
+- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for AP calls.
+	- Can be configured per package
+
 ## 1.3.5 ##
 - Fixed version warning message
 - Fixed created users not being put into the right usergroup (Reseller, not reseller)

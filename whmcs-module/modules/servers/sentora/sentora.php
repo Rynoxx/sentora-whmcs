@@ -62,6 +62,10 @@
  *	- Fixed version warning message
  *	- Fixed created users not being put into the right usergroup (Reseller, not reseller)
  *	- Fixed domains not being created in Sentora
+ *	1.3.6
+ *	- Fixed various bugs occuring on windows
+ *	- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for AP calls.
+ *		- Can be configured per package
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -82,7 +86,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '135';
+	return '136';
 }
 
 function getProtocol($params) {
@@ -105,8 +109,15 @@ function getUserID($params){
 	return $uid;
 }
 
+// Format:
+// $module . "." . $endpoint => "new_module"
+$default_modules = array(
+	"whmcs.CreateClient" => "manage_clients"
+);
+
 function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	global $xmws;
+	global $default_modules;
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
@@ -129,6 +140,12 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 
 	$replacevars = array("serveraccesshash", "serverusername", "serverpassword", "password");
 
+	$use_default_modules = $params["configoption3"] === "on" || $params["configoption3"] === "yes";
+
+	if($use_default_modules && !empty($default_modules[$module . "." . $endpoint])){
+		$module = $default_modules[$module . "." . $endpoint];
+	}
+
 	try{
 		$xmws->setModule($module);
 		$xmws->setEndpoint($endpoint);
@@ -139,12 +156,12 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	catch(Exception $e){
 		$str_error = "Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
 
-		logModuleCall("Sentora", $endpoint, $array_data, $str_error, "", $replacevars);
+		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $str_error, "", $replacevars);
 
 		return null;
 	}
 
-	logModuleCall("Sentora", $endpoint, $array_data, $resp->asArray(), "", $replacevars);
+	logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $resp->asArray(), "", $replacevars);
 
 	return $resp;
 }
@@ -154,6 +171,7 @@ function sentora_ConfigOptions() {
 	$configarray = array(
 		"package_name" => array("FriendlyName" => "Package Name", "Type" => "text", "Size" => "25", "Description" => "The name of the package in Sentora"),
 		"reseller" => array("FriendlyName" => "Reseller", "Type" => "yesno", "Description" => "Yes, is a reseller"),
+		"default_sentora_modules" => array("FriendlyName" => "Use default sentora modules", "Type" => "yesno", "Description" => "Should the default Sentora modules be used for creating accounts etc. (If you're not having any trouble, leave this off)")
 	);
 
 	return $configarray;
@@ -190,8 +208,6 @@ function sentora_CreateAccount($params) {
 		$groupid = "2";
 	}
 
-	logModuleCall("Sentora", "CreateAccount", $params);
-
 	// Server details
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
@@ -212,6 +228,8 @@ function sentora_CreateAccount($params) {
 		"emailsubject" => 0,
 		"emailbody" => 0
 	);
+
+	$response = null;
 
 	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
 
