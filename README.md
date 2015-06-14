@@ -32,6 +32,12 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://url.toyoursentora.tld/?module=moduleadmin`
 3. Configure the WHMCS module according to the form on the module page `http://url.toyoursentora.tld/?module=whmcs`
 
+**If you're having trouble with terminating clients through WHMCS**
+* Edit line 21 of `sentora/modules/manage_clients/code/webservice` to be this:
+`module_controller::ExecuteDeleteClient($contenttags['uid'], empty($contenttags['moveid']) ? 1 : $contenttags['moveid']);`
+Instead of this.
+`module_controller::ExecuteDeleteClient($contenttags['uid']);`
+
 ### WHMCS ###
 
 1. Download the whmcs.zip from your the WHMCS module in your Sentora panel Located here: `http://url.toyoursentora.tld/?module=whmcs`

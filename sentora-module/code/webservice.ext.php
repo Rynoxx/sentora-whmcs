@@ -117,37 +117,6 @@ class webservice extends ws_xmws {
 	}
 
 	/****************
-	 * Our version of password_assistant
-	 ****************/
-	/**
-	 * Resets a user's Sentora account password. Requires <username> and <newpassword> tags.
-	 * @return type
-	 */
-	function ResetUserPassword() {
-		$request_data = $this->XMLDataToArray($this->wsdata);
-		$ctags = $request_data['xmws']['content'];
-
-		if(!empty($ctags["whmcs_version"])){
-			$this->checkVersion($ctags["whmcs_version"]);
-		}
-
-		$dataobject = new runtime_dataobject();
-		$dataobject->addItemValue('response', '');
-		$uid = module_controller::getUserId($ctags['username']);
-		if (module_controller::UpdatePassword($uid, $ctags['newpassword'])) {
-			$dataobject->addItemValue('content',
-					ws_xmws::NewXMLTag('uid', $uid) .
-					ws_xmws::NewXMLTag('reset', 'true'));
-		} else {
-			$dataobject->addItemValue('content', 
-					ws_xmws::NewXMLTag('uid', $uid) .
-					ws_xmws::NewXMLTag('reset', 'false'));
-		}
-		return $dataobject->getDataObject();
-	}
-
-
-	/****************
 	 * Our version of manage_clients
 	 ****************/
 	/**
@@ -243,13 +212,13 @@ class webservice extends ws_xmws {
 				$ctags['email'],
 				$ctags['address'],
 				$ctags['postcode'],
-				$ctags['phone'],
-				$ctags['password']);
-		if ($response_xml == false){
-			$response_xml = "Can't update user.";
+				$ctags['phone']);
+
+		if ($response_xml == true){
+			$response_xml = "success";
 		}
 		else{
-			$response_xml = "success";
+			$response_xml = empty($response_xml) ? "Can't update user." : $response_xml;
 		}
 
 		$dataobject = new runtime_dataobject();

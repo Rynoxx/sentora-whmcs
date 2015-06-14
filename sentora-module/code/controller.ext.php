@@ -355,6 +355,10 @@ class module_controller {
 
 		$client = $numrows->fetch();
 
+		$address = is_array($address) ? implode($address) : $address;
+		$post = is_array($post) ? implode($post) : $post;
+		$phone = is_array($phone) ? implode($phone) : $phone;
+
 		$sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:userid, :fullname, :packageid, :groupid, :address, :postcode, :phone, :time)");
 		$sql->bindParam(':userid', $client['ac_id_pk']);
 		$sql->bindParam(':fullname', $fullname);
@@ -439,6 +443,7 @@ class module_controller {
 			$sql->bindParam(':passsalt', $randomsalt);
 			$sql->execute();
 		}
+
 		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_email_vc= :email, ac_package_fk= :package, ac_enabled_in= :isenabled, ac_group_fk= :group WHERE ac_id_pk = :clientid");
 		$sql->bindParam(':email', $email);
 		$sql->bindParam(':package', $package);

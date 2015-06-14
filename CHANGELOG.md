@@ -1,5 +1,10 @@
 # Changelog #
 
+## 1.3.8 ##
+- Fixed a few more errors on windows
+- Removed the ability to configure whether or not to use default Sentora modules in some situations
+- Increased usage of default Sentora modules when using API calls
+
 ## 1.3.7 ##
 - Fixed the deploy script(s) to work on Windows as well.
 - Fixed errors when using windows, the user is now properly created
@@ -7,7 +12,7 @@
 
 ## 1.3.6 ##
 - Fixed various bugs occuring on windows
-- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for AP calls.
+- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for API calls.
 	- Can be configured per package
 
 ## 1.3.5 ##

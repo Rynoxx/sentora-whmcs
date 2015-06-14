@@ -58,14 +58,25 @@
  *	1.3.4
  *	- Added support for the WHMCS debugging system
  *
- * 1.3.5
+ * 	1.3.5
  *	- Fixed version warning message
  *	- Fixed created users not being put into the right usergroup (Reseller, not reseller)
  *	- Fixed domains not being created in Sentora
  *	1.3.6
  *	- Fixed various bugs occuring on windows
- *	- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for AP calls.
+ *	- Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for API calls.
  *		- Can be configured per package
+ *
+ *	1.3.7
+ *	- Fixed the deploy script(s) to work on Windows as well.
+ *	- Fixed errors when using windows, the user is now properly created
+ *	- Improved error messages when creating users.
+ *
+ *	1.3.8
+ *	- Fixed a few more errors on windows
+ *	- Removed the ability to configure whether or not to use default Sentora modules in some situations
+ *	- Increased usage of default Sentora modules when using API calls
+ *
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -86,7 +97,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '137';
+	return '138';
 }
 
 function getProtocol($params) {
@@ -109,12 +120,6 @@ function getUserID($params){
 	return $uid;
 }
 
-// Format:
-// $module . "." . $endpoint => "new_module"
-$default_modules = array(
-	"whmcs.CreateClient" => "manage_clients"
-);
-
 function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	global $xmws;
 	global $default_modules;
@@ -123,10 +128,6 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
 
 	$resp = null;
-
-	if(empty($array_data["whmcs_version"])){
-		$array_data["whmcs_version"] = getModuleVersion();
-	}
 
 	if($xmws == null){
 		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], ['verify' => false]);
@@ -170,8 +171,7 @@ function sentora_ConfigOptions() {
 	// Option for the product
 	$configarray = array(
 		"package_name" => array("FriendlyName" => "Package Name", "Type" => "text", "Size" => "25", "Description" => "The name of the package in Sentora"),
-		"reseller" => array("FriendlyName" => "Reseller", "Type" => "yesno", "Description" => "Yes, is a reseller"),
-		"default_sentora_modules" => array("FriendlyName" => "Use default sentora modules", "Type" => "yesno", "Description" => "Should the default Sentora modules be used for creating accounts etc. (If you're not having any trouble, leave this off)")
+		"reseller" => array("FriendlyName" => "Reseller", "Type" => "yesno", "Description" => "Yes, is a reseller")
 	);
 
 	return $configarray;
@@ -281,8 +281,12 @@ function sentora_TerminateAccount($params) {
 		return "Error getting the UID";
 	}
 
+	// Server details
+	$serveraccesshash = explode(",", $params["serveraccesshash"]);
+	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
+
 	// Starting to Terminate the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid]);
+	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "moveid" => $server_reseller]);
 
 	$content = $response->asArray();
 	// If disabled return true, is done!
@@ -345,20 +349,17 @@ function sentora_UnsuspendAccount($params) {
 
 function sentora_ChangePassword($params) {
 	// sendVersionToSentora($params);
-	// Account details
-	$username = $params["username"];       # Username defined in the product
-	$password = $params["password"];       # Password defined in the product
-	// Server details
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_reseller = $serveraccesshash[0];      # Get the Reseller ID
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
+
+	$uid = getUserID($params);
+
+	if (empty($uid)) {
+		return "Error getting the UID";
+	}
 
 	// Reset the password
-	$response = sendSenitorRequest($params, "whmcs", "ResetUserPassword", [
-			"username" => $username,
-			"password" => $password
+	$response = sendSenitorRequest($params, "password_assistant", "ResetUserPassword", [
+			"uid" => $uid,
+			"newpassword" => $params["password"]
 		]);
 
 	$content = $response->asArray();
@@ -409,12 +410,12 @@ function sentora_ChangePackage($params) {
 		"packageid" => $configoption1,
 		"groupid" => $groupid,
 		"uid" => $uid,
-		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "</fullname>",
-		"email" => $clientsdetails['email'],
-		"address" => $clientsdetails['address1'],
-		"postcode" => $clientsdetails['postcode'],
-		"password" => $password,
-		"phone" => $clientsdetails['phonenumber']
+		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] or "",
+		"email" => $clientsdetails['email'] or "",
+		"address" => $clientsdetails['address1'] or "",
+		"postcode" => $clientsdetails['postcode'] or "",
+		"password" => $password or "",
+		"phone" => $clientsdetails['phonenumber'] or ""
 	];
 
 	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);
