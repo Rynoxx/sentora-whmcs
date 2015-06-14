@@ -4,6 +4,7 @@ _These modules allow WHMCS to create users, suspend, unsuspend, terminate, chang
 
 WHMCS Module tested on version 5.3.12, 5.3.13 and 5.3.14, OS: CentOS 6.5  
 Sentora Module tested on Sentora 1.0.0, OS: CentOS 7  
+Sentora Module tested on AWServer ZPanelX v2.1, OS: Windows 7  
 Status page tested on Windows 7 running WAMP and CentOS 7 running Sentora
 
 

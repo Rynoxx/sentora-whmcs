@@ -195,7 +195,7 @@ class webservice extends ws_xmws {
 		//fclose($fp);
 		$userExists = module_controller::getUserExists($ctags['username']);
 		if ($userExists == false) {
-			module_controller::ExecuteCreateClient(
+			$result = module_controller::ExecuteCreateClient(
 					$ctags['resellerid'],
 					$ctags['username'],
 					$ctags['packageid'],
@@ -210,7 +210,13 @@ class webservice extends ws_xmws {
 					$ctags['emailsubject'],
 					$ctags['emailbody']
 				);
-			$response_xml = 'success';
+
+			if(module_controller::getUserExists($ctags['username'])){
+				$response_xml = 'success';
+			}
+			else{
+				$response_xml = "Failed to create user. Error: $result";
+			}
 		} else {
 			$response_xml = "A user already exists with that username.";
 		}

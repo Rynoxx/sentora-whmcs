@@ -4,11 +4,11 @@
  */
 // determine Sentora root directory
 $currentDir = rtrim(dirname(__FILE__), '/\\');
-$folders = explode('/', $currentDir);
+$folders = explode(DIRECTORY_SEPARATOR, $currentDir);
 $sentoraRoot = '';
 $i = 0;
-while ($folders[$i] != 'modules') {
-	$sentoraRoot .= $folders[$i].'/';
+while ($folders[$i] != 'modules' && !empty($folders[$i])) {
+	$sentoraRoot .= $folders[$i].DIRECTORY_SEPARATOR;
 	$i++;
 }
 require_once $sentoraRoot.'dryden/loader.inc.php';

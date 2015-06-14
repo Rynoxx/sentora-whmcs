@@ -1,5 +1,10 @@
 # Changelog #
 
+## 1.3.7 ##
+- Fixed the deploy script(s) to work on Windows as well.
+- Fixed errors when using windows, the user is now properly created
+- Improved error messages when creating users.
+
 ## 1.3.6 ##
 - Fixed various bugs occuring on windows
 - Added the ability to configure the use of the default Sentora modules instead of the WHMCS in some cases, for AP calls.

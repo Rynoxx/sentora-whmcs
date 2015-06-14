@@ -86,7 +86,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '136';
+	return '137';
 }
 
 function getProtocol($params) {

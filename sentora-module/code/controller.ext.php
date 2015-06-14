@@ -283,9 +283,45 @@ class module_controller {
 		$username = strtolower(str_replace(' ', '', $username));
 		$reseller = ctrl_users::GetUserDetail($uid);
 
+		if(!is_numeric($packageid)) $packageid=self::getPackageIdFix($packageid);
+
 		// Check for errors before we continue...
 		if (fs_director::CheckForEmptyValue(self::CheckCreateForErrors($username, $packageid, $groupid, $email, $password))) {
-			return false;
+			$errormsg = " ";
+
+			if(self::$alreadyexists){
+				$errormsg .= "That username is already taken (\"" . (string)$username . "\"). ";
+			}
+
+			if(self::$badname){
+				$errormsg .= "That username is invalid (\"" . (string)$username . "\"). ";
+			}
+
+			if(self::$badpassword){
+				$errormsg .= "That password doesn't meet the requirements (\"" . (string)$password . "\"). ";
+			}
+
+			if(self::$userblank){
+				$errormsg .= "The username is empty (\"" . (string)$username . "\"). ";
+			}
+
+			if(self::$emailblank){
+				$errormsg .= "The email is empty (\"" . (string)$email . "\"). ";
+			}
+
+			if(self::$passwordblank){
+				$errormsg .= "The password is empty (\"" . (string)$password . "\"). ";
+			}
+
+			if(self::$packageblank){
+				$errormsg .= "The package is empty (\"" . (string)$packageid . "\"). ";
+			}
+
+			if(self::$groupblank){
+				$errormsg .= "The group is empty (\"" . (string)$groupid . "\"). ";
+			}
+
+			return "Failed the check for valid parameters." . $errormsg;
 		}
 		runtime_hook::Execute('OnBeforeCreateClient');
 
@@ -310,11 +346,13 @@ class module_controller {
 		$sql->bindParam(':resellertheme', $reseller['usertheme']);
 		$sql->bindParam(':resellercss', $reseller['usercss']);
 		$sql->execute();
+
 		// Now lets pull back the client ID so that we can add their personal address details etc...
 		//$client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk=" . $uid . " ORDER BY ac_id_pk DESC")->Fetch();
 		$numrows = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_reseller_fk=:uid ORDER BY ac_id_pk DESC");
 		$numrows->bindParam(':uid', $uid);
 		$numrows->execute();
+
 		$client = $numrows->fetch();
 
 		$sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:userid, :fullname, :packageid, :groupid, :address, :postcode, :phone, :time)");
@@ -328,12 +366,14 @@ class module_controller {
 		$time = time();
 		$sql->bindParam(':time', $time);
 		$sql->execute();
+
 		// Now we add an entry into the bandwidth table, for the user for the upcoming month.
 		$sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (:ac_id_pk, :date, 0, 0)");
 		$date = date("Ym", time());
 		$sql->bindParam(':date', $date);
 		$sql->bindParam(':ac_id_pk', $client['ac_id_pk']);
 		$sql->execute();
+
 		// Lets create the client diectories
 		fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username);
 		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username, 0777);
