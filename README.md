@@ -46,7 +46,7 @@ Instead of this.
 > /var/sentora/hostdata/username/public_html/domainname/ (Sentora has this folder structure, in this case WHMCS installed directly to the domain root)  
 
 3. In the WHMCS admin panel, navigate to "Setup" -> "Product/Services" -> "Servers" and add a new server
-	1. Set the IP Address of the server to the domainname you use to access your Sentora installation (and if you're running a port which isn't 80 (for non HTTPS) or 443 (for SSL))
+	1. Set the IP Address of the server to the domainname or ip you use to access your Sentora installation (and if you're running a port which isn't 80 (for non HTTPS) or 443 (for SSL))
 
 	2. Set the Server Status Address to `http://url.toyoursentora.tld/modules/whmcs/assets/status.php` where example.com should be replaced by the domain (or IP) of your Sentora installation (And replace http with https if you're running a secure server)
 
@@ -57,6 +57,44 @@ Instead of this.
 	4. Set the server type to "Sentora". Leave Username and Password empty and in the access hash put `NUM,API-KEY` where `NUM` is the user id of the reseller account (leave it as `1` to be zadmin) and the `API-KEY` can be found on the WHMCS module page in Sentora.
 
 	5. Tick the "Secure" box if you want WHMCS to connect to your server using HTTPS instead of HTTP
+
+### WHMCS Setup guide ###
+**Written by [conceptr980](http://forums.sentora.org/member.php?action=profile&uid=1196 "Conceptr980s profile on the Sentora forum")**
+
+#### WHMCS - Servers ####
+**- Create New Server/Edit Server**
+* **Name**: Whatever you want
+* **Hostname**: Your Hostpanel URL (Ex, host.domain.com) **EXCLUDING http:// AND https://**
+* **-Nameservers**
+* **Nameserver**: Primary and secondary if exist with or without an IP should be ok.
+* **- Server Details:**
+* **Type**: Sentora
+* **Username**: Empty
+* **Password**: Empty
+* **Access Hash**: 1,Key
+* **Note**: you can view your key in WHMCS module in your Home --> Host Management --> WHMCS --> Toggle API Key Visibility
+* **Secure**: Depends on your settings
+
+#### WHMCS Products/Services ####
+**- Create New Product**
+* **Product Type**: Hosting Account
+* **Product Group**: Whatever you created
+* **Product Name**: Name of your product  
+**- Details Tab: Fill the desired Info**  
+**- Modules Settings Tab**
+* **Module Name**: Sentora
+* **Server Group**: Whatever you created or leave it none
+* **Package Name**: The name of your package in the host panel
+* (Copy and past package name, Home --> Hosting Management --> Package Manager)
+* **Reseller**: Tick
+* **Automatically setup the product as soon as the first payment is received**: Most Common Choice
+
+**- WHMCS View/Search Clients**
+* Click on your client name --> Add New Order
+* Add new order details --> Fill the info and make sure your Product/Service is pointed to the right service
+* Submit Order
+* Products/Services Tab (Make sure that you have a user name otherwise it will return an error)
+* Create, Suspend, Unsespend ... Etc
 
 ### Updating the module ###
 To update the Sentora module enter the following command to your terminal:  
