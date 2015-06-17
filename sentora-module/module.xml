@@ -2,7 +2,7 @@
 <module>
 	<name>WHMCS</name>
 	<version>138</version>
-	<type></type>
+	<type>user</type>
 	<defaultcat>Server Admin</defaultcat>
 	<desc>WHMCS is a licensed billing system.</desc>
 	<authorname>Rynoxx</authorname>
