@@ -15,7 +15,7 @@ class Url
     private $password;
     private $path = '';
     private $fragment;
-    private static $defaultPorts = ['http' => 80, 'https' => 443, 'ftp' => 21];
+    private static $defaultPorts = array('http' => 80, 'https' => 443, 'ftp' => 21);
     private static $pathPattern = '/[^a-zA-Z0-9\-\._~!\$&\'\(\)\*\+,;=%:@\/]+|%(?![A-Fa-f0-9]{2})/';
     private static $queryPattern = '/[^a-zA-Z0-9\-\._~!\$\'\(\)\*\+,;%:@\/\?=&]+|%(?![A-Fa-f0-9]{2})/';
     /** @var Query|string Query part of the URL */
@@ -31,9 +31,9 @@ class Url
      */
     public static function fromString($url)
     {
-        static $defaults = ['scheme' => null, 'host' => null,
+        static $defaults = array('scheme' => null, 'host' => null,
             'path' => null, 'port' => null, 'query' => null,
-            'user' => null, 'pass' => null, 'fragment' => null];
+            'user' => null, 'pass' => null, 'fragment' => null);
 
         if (false === ($parts = parse_url($url))) {
             throw new \InvalidArgumentException('Unable to parse malformed '
@@ -294,14 +294,14 @@ class Url
      */
     public function removeDotSegments()
     {
-        static $noopPaths = ['' => true, '/' => true, '*' => true];
-        static $ignoreSegments = ['.' => true, '..' => true];
+        static $noopPaths = array('' => true, '/' => true, '*' => true);
+        static $ignoreSegments = array('.' => true, '..' => true);
 
         if (isset($noopPaths[$this->path])) {
             return;
         }
 
-        $results = [];
+        $results = array();
         $segments = $this->getPathSegments();
         foreach ($segments as $segment) {
             if ($segment == '..') {
@@ -453,7 +453,7 @@ class Url
                 // Ensure the query does not have illegal characters.
                 $this->query = preg_replace_callback(
                     self::$queryPattern,
-                    [__CLASS__, 'encodeMatch'],
+                    array(__CLASS__, 'encodeMatch'),
                     $query
                 );
             }
@@ -584,7 +584,7 @@ class Url
      */
     public static function encodePath($path)
     {
-        static $cb = [__CLASS__, 'encodeMatch'];
+        static $cb = array(__CLASS__, 'encodeMatch');
         return preg_replace_callback(self::$pathPattern, $cb, $path);
     }
 

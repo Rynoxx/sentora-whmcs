@@ -16,7 +16,7 @@ class XmwsRequest
      * Custom options for the cURL/Guzzle request.
      * @var array
      */
-    protected $options = [];
+    protected $options = array();
 
     /**
      * The API request body (XML string)
@@ -24,7 +24,7 @@ class XmwsRequest
      */
     protected $request_message;
 
-    public function __construct(Transmission $request, array $optional_headers = [])
+    public function __construct(Transmission $request, array $optional_headers = array())
     {
         $this->request_message = $request;
         $this->setOptions($optional_headers);
@@ -54,10 +54,10 @@ class XmwsRequest
      */
     private function initClient()
     {
-        $this->http_client = new Client([
+        $this->http_client = new Client(array(
             'base_url' => $this->request_message->getTarget() . '/api/',
             'defaults' => $this->getOptions(),
-        ]);
+        ));
     }
 
     /**
@@ -76,10 +76,10 @@ class XmwsRequest
      */
     private function requestOptions()
     {
-        return array_merge_recursive([
+        return array_merge_recursive(array(
             'body' => $this->request_message,
             'allow_redirects' => true,
-            ], $this->getOptions());
+            ), $this->getOptions());
     }
 
     /**

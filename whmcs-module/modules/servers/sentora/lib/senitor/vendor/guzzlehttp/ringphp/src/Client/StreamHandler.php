@@ -17,7 +17,7 @@ class StreamHandler
 {
     private $options;
 
-    public function __construct(array $options = [])
+    public function __construct(array $options = array())
     {
         $this->options = $options;
     }
@@ -40,12 +40,12 @@ class StreamHandler
     private function createResponse(array $request, $url, array $hdrs, $stream)
     {
         $parts = explode(' ', array_shift($hdrs), 3);
-        $response = [
+        $response = array(
             'status'         => $parts[1],
             'reason'         => isset($parts[2]) ? $parts[2] : null,
             'headers'        => Core::headersFromLines($hdrs),
             'effective_url'  => $url,
-        ];
+        );
 
         $stream = $this->checkDecode($request, $response, $stream);
 
@@ -131,13 +131,13 @@ class StreamHandler
             $e = new ConnectException($e->getMessage(), 0, $e);
         }
 
-        return new CompletedFutureArray([
+        return new CompletedFutureArray(array(
             'status'        => null,
             'body'          => null,
-            'headers'       => [],
+            'headers'       => array(),
             'effective_url' => $url,
             'error'         => $e
-        ]);
+        ));
     }
 
     /**
@@ -152,11 +152,11 @@ class StreamHandler
     {
         $errors = null;
         set_error_handler(function ($_, $msg, $file, $line) use (&$errors) {
-            $errors[] = [
+            $errors[] = array(
                 'message' => $msg,
                 'file'    => $file,
                 'line'    => $line
-            ];
+            );
             return true;
         });
 
@@ -191,7 +191,7 @@ class StreamHandler
         if ((!isset($request['version']) || $request['version'] == '1.1')
             && !Core::hasHeader($request, 'Connection')
         ) {
-            $request['headers']['Connection'] = ['close'];
+            $request['headers']['Connection'] = array('close');
         }
 
         // Ensure SSL is verified by default
@@ -199,7 +199,7 @@ class StreamHandler
             $request['client']['verify'] = true;
         }
 
-        $params = [];
+        $params = array();
         $options = $this->getDefaultOptions($request);
 
         if (isset($request['client'])) {
@@ -229,15 +229,15 @@ class StreamHandler
             }
         }
 
-        $context = [
-            'http' => [
+        $context = array(
+            'http' => array(
                 'method'           => $request['http_method'],
                 'header'           => $headers,
                 'protocol_version' => isset($request['version']) ? $request['version'] : 1.1,
                 'ignore_errors'    => true,
                 'follow_location'  => 0,
-            ],
-        ];
+            ),
+        );
 
         $body = Core::body($request);
         if (isset($body)) {
@@ -328,7 +328,7 @@ class StreamHandler
             return;
         }
 
-        static $map = [
+        static $map = array(
             STREAM_NOTIFY_CONNECT       => 'CONNECT',
             STREAM_NOTIFY_AUTH_REQUIRED => 'AUTH_REQUIRED',
             STREAM_NOTIFY_AUTH_RESULT   => 'AUTH_RESULT',
@@ -339,10 +339,10 @@ class StreamHandler
             STREAM_NOTIFY_FAILURE       => 'FAILURE',
             STREAM_NOTIFY_COMPLETED     => 'COMPLETED',
             STREAM_NOTIFY_RESOLVE       => 'RESOLVE',
-        ];
+        );
 
-        static $args = ['severity', 'message', 'message_code',
-            'bytes_transferred', 'bytes_max'];
+        static $args = array('severity', 'message', 'message_code',
+            'bytes_transferred', 'bytes_max');
 
         $value = Core::getDebugResource($value);
         $ident = $request['http_method'] . ' ' . Core::url($request);

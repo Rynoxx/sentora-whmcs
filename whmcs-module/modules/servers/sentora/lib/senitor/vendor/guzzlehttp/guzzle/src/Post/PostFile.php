@@ -13,7 +13,7 @@ class PostFile implements PostFileInterface
     private $name;
     private $filename;
     private $content;
-    private $headers = [];
+    private $headers = array();
 
     /**
      * @param string          $name     Name of the form field
@@ -27,7 +27,7 @@ class PostFile implements PostFileInterface
         $name,
         $content,
         $filename = null,
-        array $headers = []
+        array $headers = array()
     ) {
         $this->headers = $headers;
         $this->name = $name;

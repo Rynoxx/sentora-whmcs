@@ -41,8 +41,8 @@ class FutureResponse implements ResponseInterface, FutureInterface
     ) {
         return new FutureResponse(
             $future->then($onFulfilled, $onRejected, $onProgress),
-            [$future, 'wait'],
-            [$future, 'cancel']
+            array($future, 'wait'),
+            array($future, 'cancel')
         );
     }
 
@@ -76,12 +76,12 @@ class FutureResponse implements ResponseInterface, FutureInterface
         $this->_value->setEffectiveUrl($url);
     }
 
-    public function json(array $config = [])
+    public function json(array $config = array())
     {
         return $this->_value->json($config);
     }
 
-    public function xml(array $config = [])
+    public function xml(array $config = array())
     {
         return $this->_value->xml($config);
     }

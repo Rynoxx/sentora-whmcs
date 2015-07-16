@@ -53,7 +53,7 @@ class Transaction
      *
      * @var array
      */
-    public $transferInfo = [];
+    public $transferInfo = array();
 
     /**
      * The number of transaction retries.

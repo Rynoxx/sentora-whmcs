@@ -9,7 +9,7 @@ use GuzzleHttp\ToArrayInterface;
 class SetCookie implements ToArrayInterface
 {
     /** @var array */
-    private static $defaults = [
+    private static $defaults = array(
         'Name'     => null,
         'Value'    => null,
         'Domain'   => null,
@@ -19,7 +19,7 @@ class SetCookie implements ToArrayInterface
         'Secure'   => false,
         'Discard'  => false,
         'HttpOnly' => false
-    ];
+    );
 
     /** @var array Cookie data */
     private $data;
@@ -72,7 +72,7 @@ class SetCookie implements ToArrayInterface
     /**
      * @param array $data Array of cookie data provided by a Cookie parser
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data = array())
     {
         $this->data = array_replace(self::$defaults, $data);
         // Extract the Expires value and turn it into a UNIX timestamp if needed

@@ -47,8 +47,8 @@ class Pool implements FutureInterface
     /** @var PromiseInterface */
     private $promise;
 
-    private $waitQueue = [];
-    private $eventListeners = [];
+    private $waitQueue = array();
+    private $eventListeners = array();
     private $poolSize;
     private $isRealized = false;
 
@@ -76,7 +76,7 @@ class Pool implements FutureInterface
     public function __construct(
         ClientInterface $client,
         $requests,
-        array $options = []
+        array $options = array()
     ) {
         $this->client = $client;
         $this->iter = $this->coerceIterable($requests);
@@ -86,7 +86,7 @@ class Pool implements FutureInterface
             ? $options['pool_size'] : 25;
         $this->eventListeners = $this->prepareListeners(
             $options,
-            ['before', 'complete', 'error', 'end']
+            array('before', 'complete', 'error', 'end')
         );
     }
 
@@ -109,7 +109,7 @@ class Pool implements FutureInterface
     public static function batch(
         ClientInterface $client,
         $requests,
-        array $options = []
+        array $options = array()
     ) {
         $hash = new \SplObjectStorage();
         foreach ($requests as $request) {
@@ -120,15 +120,15 @@ class Pool implements FutureInterface
         // and event to continuously track the results of transfers in the hash.
         (new self($client, $requests, RequestEvents::convertEventArray(
             $options,
-            ['end'],
-            [
+            array('end'),
+            array(
                 'priority' => RequestEvents::LATE,
                 'fn'       => function (EndEvent $e) use ($hash) {
                     $hash[$e->getRequest()] = $e->getException()
                         ? $e->getException()
                         : $e->getResponse();
                 }
-            ]
+            )
         )))->wait();
 
         return new BatchResults($hash);
@@ -145,7 +145,7 @@ class Pool implements FutureInterface
     public static function send(
         ClientInterface $client,
         $requests,
-        array $options = []
+        array $options = array()
     ) {
         $pool = new self($client, $requests, $options);
         $pool->wait();
@@ -197,7 +197,7 @@ class Pool implements FutureInterface
 
         // Clean up no longer needed state.
         $this->isRealized = true;
-        $this->waitQueue = $this->eventListeners = [];
+        $this->waitQueue = $this->eventListeners = array();
         $this->client = $this->iter = null;
         $this->deferred->resolve(true);
 
@@ -287,7 +287,7 @@ class Pool implements FutureInterface
         $request->getConfig()->set('future', 'lazy');
         $hash = spl_object_hash($request);
         $this->attachListeners($request, $this->eventListeners);
-        $request->getEmitter()->on('before', [$this, '_trackRetries'], RequestEvents::EARLY);
+        $request->getEmitter()->on('before', array($this, '_trackRetries'), RequestEvents::EARLY);
         $response = $this->client->send($request);
         $this->waitQueue[$hash] = $response;
         $promise = $response->promise();
@@ -326,8 +326,8 @@ class Pool implements FutureInterface
     {
         unset($this->waitQueue[$hash]);
         $result = $value instanceof ResponseInterface
-            ? ['request' => $request, 'response' => $value, 'error' => null]
-            : ['request' => $request, 'response' => null, 'error' => $value];
+            ? array('request' => $request, 'response' => $value, 'error' => null)
+            : array('request' => $request, 'response' => null, 'error' => $value);
         $this->deferred->progress($result);
     }
 }

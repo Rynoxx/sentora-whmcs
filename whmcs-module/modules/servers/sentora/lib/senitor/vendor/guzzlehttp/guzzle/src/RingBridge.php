@@ -32,7 +32,7 @@ class RingBridge
         // No need to calculate the query string twice (in URL and query).
         $qs = ($pos = strpos($url, '?')) ? substr($url, $pos + 1) : null;
 
-        return [
+        return array(
             'scheme'       => $request->getScheme(),
             'http_method'  => $request->getMethod(),
             'url'          => $url,
@@ -43,7 +43,7 @@ class RingBridge
             'client'       => $options,
             'query_string' => $qs,
             'future'       => isset($options['future']) ? $options['future'] : false
-        ];
+        );
     }
 
     /**
@@ -86,10 +86,10 @@ class RingBridge
     ) {
         $trans->state = 'complete';
         $trans->transferInfo = isset($response['transfer_stats'])
-            ? $response['transfer_stats'] : [];
+            ? $response['transfer_stats'] : array();
 
         if (!empty($response['status'])) {
-            $options = [];
+            $options = array();
             if (isset($response['version'])) {
                 $options['protocol_version'] = $response['version'];
             }
@@ -98,7 +98,7 @@ class RingBridge
             }
             $trans->response = $messageFactory->createResponse(
                 $response['status'],
-                isset($response['headers']) ? $response['headers'] : [],
+                isset($response['headers']) ? $response['headers'] : array(),
                 isset($response['body']) ? $response['body'] : null,
                 $options
             );
@@ -126,7 +126,7 @@ class RingBridge
      */
     public static function fromRingRequest(array $request)
     {
-        $options = [];
+        $options = array();
         if (isset($request['version'])) {
             $options['protocol_version'] = $request['version'];
         }
@@ -138,7 +138,7 @@ class RingBridge
         return new Request(
             $request['http_method'],
             Core::url($request),
-            isset($request['headers']) ? $request['headers'] : [],
+            isset($request['headers']) ? $request['headers'] : array(),
             isset($request['body']) ? Stream::factory($request['body']) : null,
             $options
         );

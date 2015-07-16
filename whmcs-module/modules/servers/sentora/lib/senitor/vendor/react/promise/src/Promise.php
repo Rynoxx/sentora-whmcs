@@ -7,8 +7,8 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
     private $canceller;
     private $result;
 
-    private $handlers = [];
-    private $progressHandlers = [];
+    private $handlers = array();
+    private $progressHandlers = array();
 
     private $requiredCancelRequests = 0;
     private $cancelRequests = 0;
@@ -156,7 +156,7 @@ class Promise implements ExtendedPromiseInterface, CancellablePromiseInterface
             $handler($result);
         }
 
-        $this->progressHandlers = $this->handlers = [];
+        $this->progressHandlers = $this->handlers = array();
 
         $this->result = $result;
     }

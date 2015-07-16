@@ -34,7 +34,7 @@ class Redirect implements SubscriberInterface
 {
     public function getEvents()
     {
-        return ['complete' => ['onComplete', RequestEvents::REDIRECT_RESPONSE]];
+        return array('complete' => array('onComplete', RequestEvents::REDIRECT_RESPONSE));
     }
 
     /**
@@ -103,7 +103,7 @@ class Redirect implements SubscriberInterface
         ResponseInterface $response
     ) {
         $config = $request->getConfig();
-        $protocols = $config->getPath('redirect/protocols') ?: ['http', 'https'];
+        $protocols = $config->getPath('redirect/protocols') ?: array('http', 'https');
 
         // Use a GET request if this is an entity enclosing request and we are
         // not forcing RFC compliance, but rather emulating what all browsers

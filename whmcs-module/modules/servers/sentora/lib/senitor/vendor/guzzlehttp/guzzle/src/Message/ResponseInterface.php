@@ -82,7 +82,7 @@ interface ResponseInterface extends MessageInterface
      *     parse settings.
      * @throws \RuntimeException if the response body is not in JSON format
      */
-    public function json(array $config = []);
+    public function json(array $config = array());
 
     /**
      * Parse the XML response body and return a \SimpleXMLElement.
@@ -107,5 +107,5 @@ interface ResponseInterface extends MessageInterface
      * @throws \RuntimeException if the response body is not in XML format
      * @link http://websec.io/2012/08/27/Preventing-XXE-in-PHP.html
      */
-    public function xml(array $config = []);
+    public function xml(array $config = array());
 }

@@ -42,7 +42,7 @@ trait ListenerAttacherTrait
      */
     private function prepareListeners(array $source, array $events)
     {
-        $listeners = [];
+        $listeners = array();
         foreach ($events as $name) {
             if (isset($source[$name])) {
                 $this->buildListener($name, $source[$name], $listeners);
@@ -65,11 +65,11 @@ trait ListenerAttacherTrait
      */
     private function buildListener($name, $data, &$listeners)
     {
-        static $defaults = ['priority' => 0, 'once' => false];
+        static $defaults = array('priority' => 0, 'once' => false);
 
         // If a callable is provided, normalize it to the array format.
         if (is_callable($data)) {
-            $data = ['fn' => $data];
+            $data = array('fn' => $data);
         }
 
         // Prepare the listener and add it to the array, recursively.

@@ -65,15 +65,15 @@ function some($promisesOrValues, $howMany)
     return resolve($promisesOrValues)
         ->then(function ($array) use ($howMany) {
             if (!is_array($array) || !$array || $howMany < 1) {
-                return resolve([]);
+                return resolve(array());
             }
 
             return new Promise(function ($resolve, $reject, $notify) use ($array, $howMany) {
                 $len       = count($array);
                 $toResolve = min($howMany, $len);
                 $toReject  = ($len - $toResolve) + 1;
-                $values    = [];
-                $reasons   = [];
+                $values    = array();
+                $reasons   = array();
 
                 foreach ($array as $i => $promiseOrValue) {
                     $fulfiller = function ($val) use ($i, &$values, &$toResolve, $toReject, $resolve) {
@@ -112,12 +112,12 @@ function map($promisesOrValues, callable $mapFunc)
     return resolve($promisesOrValues)
         ->then(function ($array) use ($mapFunc) {
             if (!is_array($array) || !$array) {
-                return resolve([]);
+                return resolve(array());
             }
 
             return new Promise(function ($resolve, $reject, $notify) use ($array, $mapFunc) {
                 $toResolve = count($array);
-                $values    = [];
+                $values    = array();
 
                 foreach ($array as $i => $promiseOrValue) {
                     resolve($promiseOrValue)
@@ -143,7 +143,7 @@ function reduce($promisesOrValues, callable $reduceFunc , $initialValue = null)
     return resolve($promisesOrValues)
         ->then(function ($array) use ($reduceFunc, $initialValue) {
             if (!is_array($array)) {
-                $array = [];
+                $array = array();
             }
 
             $total = count($array);

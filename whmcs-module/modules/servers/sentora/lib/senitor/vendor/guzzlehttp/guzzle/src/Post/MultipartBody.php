@@ -23,8 +23,8 @@ class MultipartBody implements StreamInterface
      * @throws \InvalidArgumentException
      */
     public function __construct(
-        array $fields = [],
-        array $files = [],
+        array $fields = array(),
+        array $files = array(),
         $boundary = null
     ) {
         $this->boundary = $boundary ?: uniqid();

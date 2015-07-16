@@ -15,7 +15,7 @@ use GuzzleHttp\Message\ResponseInterface;
 class Mock implements SubscriberInterface, \Countable
 {
     /** @var array Array of mock responses / exceptions */
-    private $queue = [];
+    private $queue = array();
 
     /** @var bool Whether or not to consume an entity body when mocking */
     private $readBodies;
@@ -28,7 +28,7 @@ class Mock implements SubscriberInterface, \Countable
      * @param bool  $readBodies Set to false to not consume the entity body of
      *                          a request when a mock is served.
      */
-    public function __construct(array $items = [], $readBodies = true)
+    public function __construct(array $items = array(), $readBodies = true)
     {
         $this->factory = new MessageFactory();
         $this->readBodies = $readBodies;
@@ -38,7 +38,7 @@ class Mock implements SubscriberInterface, \Countable
     public function getEvents()
     {
         // Fire the event last, after signing
-        return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST - 10]];
+        return array('before' => array('onBefore', RequestEvents::SIGN_REQUEST - 10));
     }
 
     /**

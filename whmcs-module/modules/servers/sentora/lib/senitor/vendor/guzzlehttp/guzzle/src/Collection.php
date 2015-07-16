@@ -15,7 +15,7 @@ class Collection implements
     /**
      * @param array $data Associative array of data to set
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data = array())
     {
         $this->data = $data;
     }
@@ -32,9 +32,9 @@ class Collection implements
      * @throws \InvalidArgumentException if a parameter is missing
      */
     public static function fromConfig(
-        array $config = [],
-        array $defaults = [],
-        array $required = []
+        array $config = array(),
+        array $defaults = array(),
+        array $required = array()
     ) {
         $data = $config + $defaults;
 
@@ -52,7 +52,7 @@ class Collection implements
      */
     public function clear()
     {
-        $this->data = [];
+        $this->data = array();
     }
 
     /**
@@ -199,7 +199,7 @@ class Collection implements
      *
      * @return Collection
      */
-    public function map(callable $closure, array $context = [])
+    public function map(callable $closure, array $context = array())
     {
         $collection = new static();
         foreach ($this as $key => $value) {

@@ -29,7 +29,7 @@ class QueryParser
             return;
         }
 
-        $result = [];
+        $result = array();
         $this->duplicates = false;
         $this->numericIndices = true;
         $decoder = self::getDecoder($urlEncoding);

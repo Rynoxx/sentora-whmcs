@@ -35,9 +35,9 @@ class Request extends AbstractMessage implements RequestInterface
     public function __construct(
         $method,
         $url,
-        $headers = [],
+        $headers = array(),
         $body = null,
-        array $options = []
+        array $options = array()
     ) {
         $this->setUrl($url);
         $this->method = strtoupper($method);

@@ -19,10 +19,10 @@ namespace GuzzleHttp\Event;
 class Emitter implements EmitterInterface
 {
     /** @var array */
-    private $listeners = [];
+    private $listeners = array();
 
     /** @var array */
-    private $sorted = [];
+    private $sorted = array();
 
     public function on($eventName, callable $listener, $priority = 0)
     {
@@ -83,7 +83,7 @@ class Emitter implements EmitterInterface
 
         // Return the listeners for a specific event, sorted in priority order
         if (empty($this->sorted[$eventName])) {
-            $this->sorted[$eventName] = [];
+            $this->sorted[$eventName] = array();
             if (isset($this->listeners[$eventName])) {
                 krsort($this->listeners[$eventName], SORT_NUMERIC);
                 foreach ($this->listeners[$eventName] as $listeners) {
@@ -140,7 +140,7 @@ class Emitter implements EmitterInterface
     public function detach(SubscriberInterface $subscriber)
     {
         foreach ($subscriber->getEvents() as $eventName => $listener) {
-            $this->removeListener($eventName, [$subscriber, $listener[0]]);
+            $this->removeListener($eventName, array($subscriber, $listener[0]));
         }
     }
 }

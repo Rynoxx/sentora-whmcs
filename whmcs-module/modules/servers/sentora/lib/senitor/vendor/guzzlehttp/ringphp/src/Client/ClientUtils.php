@@ -23,7 +23,7 @@ class ClientUtils
     public static function getDefaultCaBundle()
     {
         static $cached = null;
-        static $cafiles = [
+        static $cafiles = array(
             // Red Hat, CentOS, Fedora (provided by the ca-certificates package)
             '/etc/pki/tls/certs/ca-bundle.crt',
             // Ubuntu, Debian (provided by the ca-certificates package)
@@ -35,7 +35,7 @@ class ClientUtils
             // Windows?
             'C:\\windows\\system32\\curl-ca-bundle.crt',
             'C:\\windows\\curl-ca-bundle.crt',
-        ];
+        );
 
         if ($cached) {
             return $cached;

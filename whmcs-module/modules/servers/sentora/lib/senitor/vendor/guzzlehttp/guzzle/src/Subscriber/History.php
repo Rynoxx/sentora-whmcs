@@ -17,7 +17,7 @@ class History implements SubscriberInterface, \IteratorAggregate, \Countable
     private $limit;
 
     /** @var array Requests and responses that have passed through the plugin */
-    private $transactions = [];
+    private $transactions = array();
 
     public function __construct($limit = 10)
     {
@@ -26,10 +26,10 @@ class History implements SubscriberInterface, \IteratorAggregate, \Countable
 
     public function getEvents()
     {
-        return [
-            'complete' => ['onComplete', RequestEvents::EARLY],
-            'error'    => ['onError', RequestEvents::EARLY],
-        ];
+        return array(
+            'complete' => array('onComplete', RequestEvents::EARLY),
+            'error'    => array('onError', RequestEvents::EARLY),
+        );
     }
 
     /**
@@ -160,11 +160,11 @@ class History implements SubscriberInterface, \IteratorAggregate, \Countable
         RequestInterface $request,
         ResponseInterface $response = null
     ) {
-        $this->transactions[] = [
+        $this->transactions[] = array(
             'request'      => $request,
             'sent_request' => clone $request,
             'response'     => $response
-        ];
+        );
         if (count($this->transactions) > $this->limit) {
             array_shift($this->transactions);
         }

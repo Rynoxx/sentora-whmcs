@@ -19,10 +19,10 @@ class PostBody implements PostBodyInterface
     /** @var callable */
     private $aggregator;
 
-    private $fields = [];
+    private $fields = array();
 
-    /** @var PostFileInterface[] */
-    private $files = [];
+    /** @var PostFileInterfacearray() */
+    private $files = array();
     private $forceMultipart = false;
     private $detached = false;
 
@@ -119,13 +119,13 @@ class PostBody implements PostBodyInterface
 
     public function addFile(PostFileInterface $file)
     {
-        $this->files[] = $file;
+        $this->filesarray() = $file;
         $this->mutate();
     }
 
     public function clearFiles()
     {
-        $this->files = [];
+        $this->files = array();
         $this->mutate();
     }
 
@@ -157,7 +157,7 @@ class PostBody implements PostBodyInterface
     public function detach()
     {
         $this->detached = true;
-        $this->fields = $this->files = [];
+        $this->fields = $this->files = array();
 
         if ($this->body) {
             $this->body->close();
@@ -217,7 +217,7 @@ class PostBody implements PostBodyInterface
 
     public function getMetadata($key = null)
     {
-        return $key ? null : [];
+        return $key ? null : array();
     }
 
     /**

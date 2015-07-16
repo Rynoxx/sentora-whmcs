@@ -32,19 +32,19 @@ class MessageFactory implements MessageFactoryInterface
     private $customOptions;
 
     /** @var array Request options passed through to request Config object */
-    private static $configMap = [
+    private static $configMap = array(
         'connect_timeout' => 1, 'timeout' => 1, 'verify' => 1, 'ssl_key' => 1,
         'cert' => 1, 'proxy' => 1, 'debug' => 1, 'save_to' => 1, 'stream' => 1,
         'expect' => 1, 'future' => 1
-    ];
+    );
 
     /** @var array Default allow_redirects request option settings  */
-    private static $defaultRedirect = [
+    private static $defaultRedirect = array(
         'max'       => 5,
         'strict'    => false,
         'referer'   => false,
-        'protocols' => ['http', 'https']
-    ];
+        'protocols' => array('http', 'https')
+    );
 
     /**
      * @param array $customOptions Associative array of custom request option
@@ -52,7 +52,7 @@ class MessageFactory implements MessageFactoryInterface
      *                             the option. The function accepts the request
      *                             and the option value to apply.
      */
-    public function __construct(array $customOptions = [])
+    public function __construct(array $customOptions = array())
     {
         $this->errorPlugin = new HttpError();
         $this->redirectPlugin = new Redirect();
@@ -61,9 +61,9 @@ class MessageFactory implements MessageFactoryInterface
 
     public function createResponse(
         $statusCode,
-        array $headers = [],
+        array $headers = array(),
         $body = null,
-        array $options = []
+        array $options = array()
     ) {
         if (null !== $body) {
             $body = Stream::factory($body);
@@ -72,7 +72,7 @@ class MessageFactory implements MessageFactoryInterface
         return new Response($statusCode, $headers, $body, $options);
     }
 
-    public function createRequest($method, $url, array $options = [])
+    public function createRequest($method, $url, array $options = array())
     {
         // Handle the request protocol version option that needs to be
         // specified in the request constructor.
@@ -81,8 +81,8 @@ class MessageFactory implements MessageFactoryInterface
             unset($options['version']);
         }
 
-        $request = new Request($method, $url, [], null,
-            isset($options['config']) ? $options['config'] : []);
+        $request = new Request($method, $url, array(), null,
+            isset($options['config']) ? $options['config'] : array());
 
         unset($options['config']);
 
@@ -91,7 +91,7 @@ class MessageFactory implements MessageFactoryInterface
             && !isset($options['body'])
             && !isset($options['json'])
         ) {
-            $options['body'] = [];
+            $options['body'] = array();
         }
 
         if ($options) {
@@ -135,13 +135,13 @@ class MessageFactory implements MessageFactoryInterface
         return $this->createRequest(
             $data['method'],
             Url::buildUrl($data['request_url']),
-            [
+            array(
                 'headers' => $data['headers'],
                 'body' => $data['body'] === '' ? null : $data['body'],
-                'config' => [
+                'config' => array(
                     'protocol_version' => $data['protocol_version']
-                ]
-            ]
+                )
+            )
         );
     }
 
@@ -154,8 +154,8 @@ class MessageFactory implements MessageFactoryInterface
      */
     protected function addPostData(RequestInterface $request, array $body)
     {
-        static $fields = ['string' => true, 'array' => true, 'NULL' => true,
-            'boolean' => true, 'double' => true, 'integer' => true];
+        static $fields = array('string' => true, 'array' => true, 'NULL' => true,
+            'boolean' => true, 'double' => true, 'integer' => true);
 
         $post = new PostBody();
         foreach ($body as $key => $value) {
@@ -177,7 +177,7 @@ class MessageFactory implements MessageFactoryInterface
 
     protected function applyOptions(
         RequestInterface $request,
-        array $options = []
+        array $options = array()
     ) {
         $config = $request->getConfig();
         $emitter = $request->getEmitter();
@@ -324,7 +324,7 @@ class MessageFactory implements MessageFactoryInterface
                 $this->attachListeners($request,
                     $this->prepareListeners(
                         $value,
-                        ['before', 'complete', 'error', 'progress', 'end']
+                        array('before', 'complete', 'error', 'progress', 'end')
                     )
                 );
                 break;

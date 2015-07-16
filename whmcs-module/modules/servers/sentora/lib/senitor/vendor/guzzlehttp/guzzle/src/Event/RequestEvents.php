@@ -37,12 +37,12 @@ final class RequestEvents
     ) {
         foreach ($events as $name) {
             if (!isset($options[$name])) {
-                $options[$name] = [$handler];
+                $options[$name] = array($handler);
             } elseif (is_callable($options[$name])) {
-                $options[$name] = [$options[$name], $handler];
+                $options[$name] = array($options[$name], $handler);
             } elseif (is_array($options[$name])) {
                 if (isset($options[$name]['fn'])) {
-                    $options[$name] = [$options[$name], $handler];
+                    $options[$name] = array($options[$name], $handler);
                 } else {
                     $options[$name][] = $handler;
                 }

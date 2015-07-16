@@ -53,7 +53,7 @@ class BatchResults implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function getSuccessful()
     {
-        $results = [];
+        $results = array();
         foreach ($this->hash as $key) {
             if (!($this->hash[$key] instanceof \Exception)) {
                 $results[] = $this->hash[$key];
@@ -70,7 +70,7 @@ class BatchResults implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function getFailures()
     {
-        $results = [];
+        $results = array();
         foreach ($this->hash as $key) {
             if ($this->hash[$key] instanceof \Exception) {
                 $results[] = $this->hash[$key];
@@ -87,7 +87,7 @@ class BatchResults implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function getIterator()
     {
-        $results = [];
+        $results = array();
         foreach ($this->hash as $key) {
             $results[] = $this->hash[$key];
         }

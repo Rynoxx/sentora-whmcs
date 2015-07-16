@@ -19,10 +19,10 @@ class CurlHandler
     private $factory;
 
     /** @var array Array of curl easy handles */
-    private $handles = [];
+    private $handles = array();
 
     /** @var array Array of owned curl easy handles */
-    private $ownedHandles = [];
+    private $ownedHandles = array();
 
     /** @var int Total number of idle handles to keep in cache */
     private $maxHandles;
@@ -37,9 +37,9 @@ class CurlHandler
      *
      * @param array $options Array of options to use with the handler
      */
-    public function __construct(array $options = [])
+    public function __construct(array $options = array())
     {
-        $this->handles = $this->ownedHandles = [];
+        $this->handles = $this->ownedHandles = array();
         $this->factory = isset($options['handle_factory'])
             ? $options['handle_factory']
             : new CurlFactory();
@@ -103,12 +103,12 @@ class CurlHandler
             unset($this->handles[$id], $this->ownedHandles[$id]);
         } else {
             // curl_reset doesn't clear these out for some reason
-            static $unsetValues = [
+            static $unsetValues = array(
                 CURLOPT_HEADERFUNCTION   => null,
                 CURLOPT_WRITEFUNCTION    => null,
                 CURLOPT_READFUNCTION     => null,
                 CURLOPT_PROGRESSFUNCTION => null,
-            ];
+            );
             curl_setopt_array($handle, $unsetValues);
             curl_reset($handle);
             $this->ownedHandles[$id] = false;

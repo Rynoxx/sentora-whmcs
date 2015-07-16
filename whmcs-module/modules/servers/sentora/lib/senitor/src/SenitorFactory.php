@@ -15,7 +15,7 @@ class SenitorFactory
      * @param array $http_client_options Optional settings for the Guzzle/cURL client.
      * @return \Ballen\Senitor\Senitor
      */
-    public static function create($server, $api_key, $user, $pass, $http_client_options = [])
+    public static function create($server, $api_key, $user, $pass, $http_client_options = array())
     {
         $sentora_client = new Senitor(
             new Target($server, $user, $pass, $api_key)

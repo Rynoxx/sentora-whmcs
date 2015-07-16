@@ -31,11 +31,11 @@ class AuthBlock
      */
     private function build()
     {
-        $conflines = [
+        $conflines = array(
             'apikey' => $this->target->getApiKey(),
             'authuser' => $this->target->getUser(),
             'authpass' => $this->target->getPassword(),
-        ];
+        );
 
         $xmlcontent = "";
         foreach ($conflines as $ckey => $cvalue) {

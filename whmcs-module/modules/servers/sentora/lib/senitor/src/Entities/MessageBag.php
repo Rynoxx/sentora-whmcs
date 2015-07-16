@@ -13,7 +13,7 @@ class MessageBag
      * Item array
      * @var array 
      */
-    private $items = [];
+    private $items = array();
 
     /**
      * Generated XML tags with request data.
@@ -82,7 +82,7 @@ class MessageBag
      * @return void
      */
     public function reset(){
-        $this->items = [];
+        $this->items = array();
         $this->xml = null;
     }
 

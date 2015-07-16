@@ -29,13 +29,13 @@ class MessageParser
             $version = '1.1';
         }
 
-        $parsed = [
+        $parsed = array(
             'method'   => strtoupper($parts['start_line'][0]),
             'protocol' => $protocol,
             'protocol_version' => $version,
             'headers'  => $parts['headers'],
             'body'     => $parts['body']
-        ];
+        );
 
         $parsed['request_url'] = $this->getUrlPartsFromMessage(
             (isset($parts['start_line'][1]) ? $parts['start_line'][1] : ''), $parsed);
@@ -58,14 +58,14 @@ class MessageParser
 
         list($protocol, $version) = explode('/', trim($parts['start_line'][0]));
 
-        return [
+        return array(
             'protocol'         => $protocol,
             'protocol_version' => $version,
             'code'             => $parts['start_line'][1],
             'reason_phrase'    => isset($parts['start_line'][2]) ? $parts['start_line'][2] : '',
             'headers'          => $parts['headers'],
             'body'             => $parts['body']
-        ];
+        );
     }
 
     /**
@@ -82,7 +82,7 @@ class MessageParser
         }
 
         $startLine = null;
-        $headers = [];
+        $headers = array();
         $body = '';
 
         // Iterate over each line in the message, accounting for line endings
@@ -116,11 +116,11 @@ class MessageParser
             }
         }
 
-        return [
+        return array(
             'start_line' => $startLine,
             'headers'    => $headers,
             'body'       => $body
-        ];
+        );
     }
 
     /**
@@ -134,7 +134,7 @@ class MessageParser
     private function getUrlPartsFromMessage($requestUrl, array $parts)
     {
         // Parse the URL information from the message
-        $urlParts = ['path' => $requestUrl, 'scheme' => 'http'];
+        $urlParts = array('path' => $requestUrl, 'scheme' => 'http');
 
         // Check for the Host header
         if (isset($parts['headers']['Host'])) {

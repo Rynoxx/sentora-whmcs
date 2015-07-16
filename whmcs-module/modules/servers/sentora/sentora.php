@@ -77,6 +77,8 @@
  *	- Removed the ability to configure whether or not to use default Sentora modules in some situations
  *	- Increased usage of default Sentora modules when using API calls
  *
+ * 1.3.9
+ * - Fixed some compatability issues with PHP 5.3
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -97,7 +99,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '138';
+	return '139';
 }
 
 function getProtocol($params) {
@@ -112,7 +114,7 @@ function getAddress($params){
 }
 
 function getUserID($params){
-	$response = sendSenitorRequest($params, "whmcs", "getUserId", ["username" => $params["username"]]);
+	$response = sendSenitorRequest($params, "whmcs", "getUserId", array("username" => $params["username"]));
 
 	$resp_arr = $response->asArray();
 	$uid = $resp_arr["uid"];
@@ -130,7 +132,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	$resp = null;
 
 	if($xmws == null){
-		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], ['verify' => false]);
+		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], array('verify' => false));
 	}
 
 	try{
@@ -256,12 +258,12 @@ function sentora_CreateAccount($params) {
 		}
 
 		$response = sendSenitorRequest($params, "domains", "CreateDomain",
-			[
+			array(
 				"uid" => $uid,
 				"domain" => $domain,
 				"destination" => " ",
 				"autohome" => 1
-			]);
+			));
 
 		$content = $response->asArray();
 
@@ -286,7 +288,7 @@ function sentora_TerminateAccount($params) {
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
 
 	// Starting to Terminate the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", ["uid" => $uid, "moveid" => $server_reseller]);
+	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
 
 	$content = $response->asArray();
 	// If disabled return true, is done!
@@ -308,7 +310,7 @@ function sentora_SuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", ["uid" => $uid]);
+	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", array("uid" => $uid));
 
 	$content = $response->asArray();
 
@@ -333,7 +335,7 @@ function sentora_UnsuspendAccount($params) {
 	}
 
 	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", ["uid" => $uid]);
+	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", array("uid" => $uid));
 
 	$content = $response->asArray();
 
@@ -357,10 +359,10 @@ function sentora_ChangePassword($params) {
 	}
 
 	// Reset the password
-	$response = sendSenitorRequest($params, "password_assistant", "ResetUserPassword", [
+	$response = sendSenitorRequest($params, "password_assistant", "ResetUserPassword", array(
 			"uid" => $uid,
 			"newpassword" => $params["password"]
-		]);
+		));
 
 	$content = $response->asArray();
 
@@ -406,7 +408,7 @@ function sentora_ChangePackage($params) {
 	}
 
 	// Starting to update account on Sentora
-	$data = [
+	$data = array(
 		"packageid" => $configoption1,
 		"groupid" => $groupid,
 		"uid" => $uid,
@@ -416,7 +418,7 @@ function sentora_ChangePackage($params) {
 		"postcode" => $clientsdetails['postcode'] or "",
 		"password" => $password or "",
 		"phone" => $clientsdetails['phonenumber'] or ""
-	];
+	);
 
 	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);
 
@@ -480,7 +482,7 @@ function sentora_UsageUpdate($params) {
 	sendVersionToSentora($params);
 	// Server details
 
-	$response = sendSenitorRequest($params, "manage_clients", "GetAllClients", []); // $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+	$response = sendSenitorRequest($params, "manage_clients", "GetAllClients", array()); // $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
 	$xmws_values = $response->asArray();
 	$xmws_clients = $xmws_values['client'];
 

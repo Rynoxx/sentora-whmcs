@@ -185,7 +185,7 @@ class Query extends Collection
      */
     public static function walkQuery(array $query, $keyPrefix, callable $prefixer)
     {
-        $result = [];
+        $result = array();
         foreach ($query as $key => $value) {
             if ($keyPrefix) {
                 $key = $prefixer($key, $keyPrefix);

@@ -12,7 +12,7 @@ use GuzzleHttp\Utils;
 class Response extends AbstractMessage implements ResponseInterface
 {
     /** @var array Mapping of status codes to reason phrases */
-    private static $statusTexts = [
+    private static $statusTexts = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -71,7 +71,7 @@ class Response extends AbstractMessage implements ResponseInterface
         508 => 'Loop Detected',
         510 => 'Not Extended',
         511 => 'Network Authentication Required',
-    ];
+    );
 
     /** @var string The reason phrase of the response (human readable code) */
     private $reasonPhrase;
@@ -92,9 +92,9 @@ class Response extends AbstractMessage implements ResponseInterface
      */
     public function __construct(
         $statusCode,
-        array $headers = [],
+        array $headers = array(),
         StreamInterface $body = null,
-        array $options = []
+        array $options = array()
     ) {
         $this->statusCode = (int) $statusCode;
         $this->handleOptions($options);
@@ -135,7 +135,7 @@ class Response extends AbstractMessage implements ResponseInterface
         return $this->reasonPhrase = $phrase;
     }
 
-    public function json(array $config = [])
+    public function json(array $config = array())
     {
         try {
             return Utils::jsonDecode(
@@ -152,7 +152,7 @@ class Response extends AbstractMessage implements ResponseInterface
         }
     }
 
-    public function xml(array $config = [])
+    public function xml(array $config = array())
     {
         $disableEntities = libxml_disable_entity_loader(true);
         $internalErrors = libxml_use_internal_errors(true);
@@ -198,7 +198,7 @@ class Response extends AbstractMessage implements ResponseInterface
      *
      * @param array $options Options array passed by reference.
      */
-    protected function handleOptions(array &$options = [])
+    protected function handleOptions(array &$options = array())
     {
         parent::handleOptions($options);
         if (isset($options['reason_phrase'])) {

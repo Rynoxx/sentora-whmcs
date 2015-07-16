@@ -61,14 +61,14 @@ class Transmission
      */
     private function buildXml()
     {
-        $xml = [
+        $xml = array(
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<xmws>',
             $this->getAuthBlockXml($this->target),
             '<request>' . $this->getEndpoint() . '</request>',
             '<content>' . $this->getContentXml() . '</content>',
             '</xmws>'
-        ];
+        );
         return implode(PHP_EOL, $xml);
     }
 

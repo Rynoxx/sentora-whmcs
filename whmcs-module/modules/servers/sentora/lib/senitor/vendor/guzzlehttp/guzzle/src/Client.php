@@ -68,7 +68,7 @@ class Client implements ClientInterface
      *       function is responsible for transitioning a request through its
      *       lifecycle events.
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = array())
     {
         $this->configureBaseUrl($config);
         $this->configureDefaults($config);
@@ -105,9 +105,10 @@ class Client implements ClientInterface
         $default = $future = $streaming = null;
 
         if (extension_loaded('curl')) {
-            $config = [
+            $config = array(
                 'select_timeout' => getenv('GUZZLE_CURL_SELECT_TIMEOUT') ?: 1
-            ];
+            );
+
             if ($maxHandles = getenv('GUZZLE_CURL_MAX_HANDLES')) {
                 $config['max_handles'] = $maxHandles;
             }
@@ -175,7 +176,7 @@ class Client implements ClientInterface
         return (string) $this->baseUrl;
     }
 
-    public function createRequest($method, $url = null, array $options = [])
+    public function createRequest($method, $url = null, array $options = array())
     {
         $options = $this->mergeDefaults($options);
         // Use a clone of the client's emitter
@@ -187,37 +188,37 @@ class Client implements ClientInterface
         return $this->messageFactory->createRequest($method, $url, $options);
     }
 
-    public function get($url = null, $options = [])
+    public function get($url = null, $options = array())
     {
         return $this->send($this->createRequest('GET', $url, $options));
     }
 
-    public function head($url = null, array $options = [])
+    public function head($url = null, array $options = array())
     {
         return $this->send($this->createRequest('HEAD', $url, $options));
     }
 
-    public function delete($url = null, array $options = [])
+    public function delete($url = null, array $options = array())
     {
         return $this->send($this->createRequest('DELETE', $url, $options));
     }
 
-    public function put($url = null, array $options = [])
+    public function put($url = null, array $options = array())
     {
         return $this->send($this->createRequest('PUT', $url, $options));
     }
 
-    public function patch($url = null, array $options = [])
+    public function patch($url = null, array $options = array())
     {
         return $this->send($this->createRequest('PATCH', $url, $options));
     }
 
-    public function post($url = null, array $options = [])
+    public function post($url = null, array $options = array())
     {
         return $this->send($this->createRequest('POST', $url, $options));
     }
 
-    public function options($url = null, array $options = [])
+    public function options($url = null, array $options = array())
     {
         return $this->send($this->createRequest('OPTIONS', $url, $options));
     }
@@ -259,12 +260,12 @@ class Client implements ClientInterface
      */
     protected function getDefaultOptions()
     {
-        $settings = [
+        $settings = array(
             'allow_redirects' => true,
             'exceptions'      => true,
             'decode_content'  => true,
             'verify'          => true
-        ];
+        );
 
         // Use the standard Linux HTTP_PROXY and HTTPS_PROXY if set
         if ($proxy = getenv('HTTP_PROXY')) {
@@ -344,9 +345,9 @@ class Client implements ClientInterface
 
         // Add the default user-agent header
         if (!isset($this->defaults['headers'])) {
-            $this->defaults['headers'] = [
+            $this->defaults['headers'] = array(
                 'User-Agent' => static::getDefaultUserAgent()
-            ];
+            );
         } elseif (!Core::hasHeader($this->defaults, 'User-Agent')) {
             // Add the User-Agent header if one was not already set
             $this->defaults['headers']['User-Agent'] = static::getDefaultUserAgent();
@@ -368,7 +369,7 @@ class Client implements ClientInterface
         // options have headers specified.
         if (!empty($defaults['headers']) && !empty($options['headers'])) {
             // Create a set of lowercased keys that are present.
-            $lkeys = [];
+            $lkeys = array();
             foreach (array_keys($options['headers']) as $k) {
                 $lkeys[strtolower($k)] = true;
             }
@@ -396,7 +397,7 @@ class Client implements ClientInterface
      * @deprecated Use {@see GuzzleHttp\Pool} instead.
      * @see GuzzleHttp\Pool
      */
-    public function sendAll($requests, array $options = [])
+    public function sendAll($requests, array $options = array())
     {
         Pool::send($this, $requests, $options);
     }

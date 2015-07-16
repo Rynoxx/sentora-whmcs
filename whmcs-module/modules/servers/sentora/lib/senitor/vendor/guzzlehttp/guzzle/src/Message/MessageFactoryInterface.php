@@ -23,9 +23,9 @@ interface MessageFactoryInterface
      */
     public function createResponse(
         $statusCode,
-        array $headers = [],
+        array $headers = array(),
         $body = null,
-        array $options = []
+        array $options = array()
     );
 
     /**
@@ -67,5 +67,5 @@ interface MessageFactoryInterface
      * @return RequestInterface
      * @link http://docs.guzzlephp.org/clients.html#request-options
      */
-    public function createRequest($method, $url, array $options = []);
+    public function createRequest($method, $url, array $options = array());
 }

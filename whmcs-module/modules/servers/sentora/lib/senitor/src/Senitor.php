@@ -40,7 +40,7 @@ class Senitor
      * @see http://guzzle.readthedocs.org/en/latest/clients.html#request-options
      * @var array
      */
-    protected $optional_http_client_headers = [];
+    protected $optional_http_client_headers = array();
 
     /**
      * Optioanlly enable debug mode to echo out the response XML.
@@ -52,7 +52,7 @@ class Senitor
     {
         if ($credentials instanceof Target) {
             $this->credentials = $credentials;
-            $this->setRequestData([]);
+            $this->setRequestData(array());
         }
     }
 
@@ -140,12 +140,12 @@ class Senitor
      */
     private function getClientHeaders()
     {
-        return [
-            'headers' => [
+        return array(
+            'headers' => array(
                 'User-Agent' => 'senitor/' . $this->getSenitorVersion(),
                 'Accept' => 'application/xml',
-            ]
-        ];
+            )
+        );
     }
 
     /**

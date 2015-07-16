@@ -27,7 +27,7 @@ interface ClientInterface extends HasEmitterInterface
      *
      * @return RequestInterface
      */
-    public function createRequest($method, $url = null, array $options = []);
+    public function createRequest($method, $url = null, array $options = array());
 
     /**
      * Send a GET request
@@ -38,7 +38,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function get($url = null, $options = []);
+    public function get($url = null, $options = array());
 
     /**
      * Send a HEAD request
@@ -49,7 +49,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function head($url = null, array $options = []);
+    public function head($url = null, array $options = array());
 
     /**
      * Send a DELETE request
@@ -60,7 +60,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function delete($url = null, array $options = []);
+    public function delete($url = null, array $options = array());
 
     /**
      * Send a PUT request
@@ -71,7 +71,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function put($url = null, array $options = []);
+    public function put($url = null, array $options = array());
 
     /**
      * Send a PATCH request
@@ -82,7 +82,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function patch($url = null, array $options = []);
+    public function patch($url = null, array $options = array());
 
     /**
      * Send a POST request
@@ -93,7 +93,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function post($url = null, array $options = []);
+    public function post($url = null, array $options = array());
 
     /**
      * Send an OPTIONS request
@@ -104,7 +104,7 @@ interface ClientInterface extends HasEmitterInterface
      * @return ResponseInterface
      * @throws RequestException When an error is encountered
      */
-    public function options($url = null, array $options = []);
+    public function options($url = null, array $options = array());
 
     /**
      * Sends a single request

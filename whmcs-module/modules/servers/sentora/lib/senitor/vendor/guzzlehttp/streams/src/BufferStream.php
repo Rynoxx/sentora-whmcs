@@ -133,6 +133,6 @@ class BufferStream implements StreamInterface
             return $this->hwm;
         }
 
-        return $key ? null : [];
+        return $key ? null : array();
     }
 }

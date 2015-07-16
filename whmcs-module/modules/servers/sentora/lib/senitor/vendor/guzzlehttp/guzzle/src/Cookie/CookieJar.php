@@ -11,7 +11,7 @@ use GuzzleHttp\ToArrayInterface;
 class CookieJar implements CookieJarInterface, ToArrayInterface
 {
     /** @var SetCookie[] Loaded cookie data */
-    private $cookies = [];
+    private $cookies = array();
 
     /** @var bool */
     private $strictMode;
@@ -22,7 +22,7 @@ class CookieJar implements CookieJarInterface, ToArrayInterface
      * @param array $cookieArray Array of SetCookie objects or a hash of arrays
      *                           that can be used with the SetCookie constructor
      */
-    public function __construct($strictMode = false, $cookieArray = [])
+    public function __construct($strictMode = false, $cookieArray = array())
     {
         $this->strictMode = $strictMode;
 
@@ -46,12 +46,12 @@ class CookieJar implements CookieJarInterface, ToArrayInterface
     {
         $cookieJar = new self();
         foreach ($cookies as $name => $value) {
-            $cookieJar->setCookie(new SetCookie([
+            $cookieJar->setCookie(new SetCookie(array(
                 'Domain'  => $domain,
                 'Name'    => $name,
                 'Value'   => $value,
                 'Discard' => true
-            ]));
+            )));
         }
 
         return $cookieJar;
@@ -87,7 +87,7 @@ class CookieJar implements CookieJarInterface, ToArrayInterface
     public function clear($domain = null, $path = null, $name = null)
     {
         if (!$domain) {
-            $this->cookies = [];
+            $this->cookies = array();
             return;
         } elseif (!$path) {
             $this->cookies = array_filter(
@@ -207,7 +207,7 @@ class CookieJar implements CookieJarInterface, ToArrayInterface
 
     public function addCookieHeader(RequestInterface $request)
     {
-        $values = [];
+        $values = array();
         $scheme = $request->getScheme();
         $host = $request->getHost();
         $path = $request->getPath();

@@ -1,5 +1,9 @@
 # Changelog #
 
+## 1.3.9 ##
+- Fixed some compatibility issues with PHP 5.3 (Thanks to charityz2 for reporting the issues and letting me debug using his VPS)
+- Removed some unneeded files from the dependencies of the Senitor API (documentation files, files for testing the dependencies)
+
 ## 1.3.8 ##
 - Fixed a few more errors on windows
 - Removed the ability to configure whether or not to use default Sentora modules in some situations

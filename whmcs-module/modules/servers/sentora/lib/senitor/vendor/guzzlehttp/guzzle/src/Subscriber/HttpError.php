@@ -13,7 +13,7 @@ class HttpError implements SubscriberInterface
 {
     public function getEvents()
     {
-        return ['complete' => ['onComplete', RequestEvents::VERIFY_RESPONSE]];
+        return array('complete' => array('onComplete', RequestEvents::VERIFY_RESPONSE));
     }
 
     /**

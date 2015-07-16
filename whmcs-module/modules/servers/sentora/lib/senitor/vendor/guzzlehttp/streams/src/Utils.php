@@ -189,7 +189,7 @@ class Utils
      * @see GuzzleHttp\Stream\Stream::factory
      * @see GuzzleHttp\Stream\Stream::__construct
      */
-    public static function create($resource, array $options = [])
+    public static function create($resource, array $options = array())
     {
         return Stream::factory($resource, $options);
     }
