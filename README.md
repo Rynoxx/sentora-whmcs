@@ -20,6 +20,12 @@ _Do note that currently I've basicly only tested it and renamed variables and ed
 
 - - -
 
+## Requirements ##
+[WHMCS](http://whmcs.com/ "WHMCS Website") installed (doesn't have to be on the same machine as the sentora installation(s))
+The WHMCS installation running on PHP 5.4 or above
+
+- - -
+
 ## Installation instructions ##
 
 ### Sentora ###
