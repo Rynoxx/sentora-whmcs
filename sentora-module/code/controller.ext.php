@@ -93,6 +93,15 @@ class module_controller {
 	}
 
 	/**
+	 * generate form for resellerviewapi option
+	 * @return string HTML FORM ITEM
+	 */
+	static function getResellerViewAPIForm() {
+		$cval = ctrl_options::GetSystemOption('whmcs_reseller_view_api');
+		return ctrl_options::OuputSettingMenuField('ResellerViewAPI', 'true|false', $cval);
+	}
+
+	/**
 	 * generate form for whmcs login link
 	 * @return string HTML FORM ITEM
 	 */
@@ -112,9 +121,15 @@ class module_controller {
 		if(!isset($form['inAdminSettings'])) {
 			return false;
 		}
+
+		if(!self::getIsAdmin()){
+			return false;
+		}
+
 		ctrl_options::SetSystemOption('whmcs_sendemail_bo', $form['SendEmail']);
+		ctrl_options::SetSystemOption('whmcs_reseller_view_api', $form['ResellerViewAPI']);
 		ctrl_options::SetSystemOption('whmcs_link', $form['Link']);
-		self::$Results[] = ui_sysmessage::shout('Settings updated!', 'alert-success');
+		self::$Results[] = ui_sysmessage::shout('Settings updated!' . $form['ResellerViewAPI'], 'alert-success');
 	}
 
 	/**
@@ -126,11 +141,11 @@ class module_controller {
 	}
 
 	/**
-	 * 
+	 * Gets the link to the WHMCS installation
 	 * @return string The link admin defined in settings
 	 */
 	static function getWHMCSLink() {
-		return ctrl_options::GetSystemOption('whmcs_link');;
+		return ctrl_options::GetSystemOption('whmcs_link');
 	}
 
 	/**
@@ -141,6 +156,14 @@ class module_controller {
 		global $controller;
 		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/whmcs.zip";
 		return $module_icon;
+	}
+
+	/**
+	 * Gets the user ID of the current user
+	 * @return int - The UserID of the current user
+	 */
+	static function getCurrentUserID(){
+		return ctrl_users::GetUserDetail()["userid"];
 	}
 
 	/**
@@ -163,6 +186,15 @@ class module_controller {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Check if the user can view the API key
+	 * @return boolean - true if user is admin or (reseller and resellers can view API key)
+	 */
+	static function getCanViewAPIKey(){
+		$user = ctrl_users::GetUserDetail();
+		return self::getIsAdmin() || ($user['usergroupid'] == 2 && ctrl_options::GetSystemOption('whmcs_reseller_view_api') == 'true');
 	}
 
 	static $Results = Array();

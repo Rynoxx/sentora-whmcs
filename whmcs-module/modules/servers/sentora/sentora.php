@@ -79,6 +79,12 @@
  *
  * 1.3.9
  * - Fixed some compatability issues with PHP 5.3
+ * - Removed some unneeded files from the dependencies of the Senitor API (documentation files, files for testing the dependencies)
+ *
+ * 1.3.10
+ * - Added the ability to choose whether or not resellers can view the API key
+ * - Some style edits to the module.zpm file (module page)
+ * - Changed the module numbering to allow 2 digit numbers in versions
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -99,7 +105,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '139';
+	return '010310';
 }
 
 function getProtocol($params) {

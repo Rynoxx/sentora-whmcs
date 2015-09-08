@@ -8,7 +8,7 @@
 
 	<@ Result @>
 
-	<% if IsAdmin %>
+	<% if CanViewAPIKey %>
 		<% if BadVersionIsSet %>
 			<div id="whmcs-version-mismatch" style="display: none;"></div>
 			<script>
@@ -32,6 +32,7 @@
 			</script>
 		<% endif %>
 
+		<% if IsAdmin %>
 		<div class="zform_wrapper">
 			<form action="./?module=whmcs&action=UpdateSettings" method="post">
 				<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
@@ -47,14 +48,29 @@
 						<td>
 							<@ SendEmailForm @>
 						</td>
-						<td><p>Should Sentora send your admin users emails about important issues like version conflicts?</p></td>
+						<td>
+							<p>Should Sentora send your admin users emails about important issues like version conflicts?</p>
+						</td>
+					</tr>
+					<tr>
+						<td>Can resellers view the API key?</td>
+						<td>
+							<@ ResellerViewAPIForm @>
+						</td>
+						<td>
+							<p>
+								Should resellers be able to view the API key below?<br>
+								This is useful for instances where the Sentora installation is intended to be used in conjunction with resellers on WHMCS.<br>
+								<b>WARNING:</b> This can open up security holes as the API-key is the same for <b>ALL</b> modules on your Sentora installation. <b>USE AT YOUR OWN RISK</b>
+							</p>
+						</td>
 					</tr>
 					<tr>
 						<td>WHMCS Login Link</td>
 						<td>
 							<@ WHMCSLinkForm @>
 						</td>
-						<td><p>The link to your WHMCS login/clientarea page</p></td>
+						<td><p>The link to your WHMCS installation (e.g. http://example.com/billing)</p></td>
 					</tr>
 					<tr>
 						<td></td>
@@ -67,17 +83,19 @@
 				<@ CSFR_Tag @>
 			</form>
 		</div>
-		<a href="<@ WHMCSModule @>">Download WHMCS Module</a>
+		<% endif %>
+
+		<a href="<@ WHMCSModule @>" style="margin-bottom: 8px;">Download WHMCS Module</a>
 		<p>
 			After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area.<br />
-			Put 1,apikey (1 is the reseller id for zadmin) in the whmcs server config.<br />
-			Your API-Key can be revealed by pressing the button below (Do note that only admins can see this part of the page)<br />
-			Anytime WHMCS accesses Sentora it will tell Sentora its current module version and a notice will be generated if the versions aren't matching. It is up to you to update your WHMCS module when updating Sentora module.
+			Put <@ CurrentUserID @>,APIKEY (<@ CurrentUserID @> is the reseller id for your account) in the whmcs server config.<br />
+			The API-Key can be revealed by pressing the button below (Do note that only admins can see this part of the page)<br />
+			Anytime WHMCS accesses Sentora it will tell Sentora its current module version and a notice will be generated if the versions aren't matching. It is up to you to update your WHMCS module when updating Sentora module.<br>
 		</p>
 
-		<pre id="api-key" style="display:none; padding: 8px; margin-top: 4px;"><@ CurrentAPIKey @></pre>
+		<pre id="api-key" style="display:none; padding: 8px; margin-top: 8px;"><@ CurrentAPIKey @></pre>
 
-		<button class="btn btn-primary" style="margin-top: 4px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;">Toggle API-Key visibility</button><br>
+		<button class="btn btn-primary" style="margin-top: 8px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;">Toggle API-Key visibility</button><br>
 		<br>
 		<a href="<@ WHMCSLink @>/admin" class="btn btn-primary">Login to WHMCS</a>
 	<% else %>

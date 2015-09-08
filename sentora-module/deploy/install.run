@@ -26,6 +26,10 @@ if(ctrl_options::GetSystemOption('whmcs_reported') === FALSE) {
 	ctrl_options::SetSystemOption('whmcs_reported', 'false', TRUE);
 }
 
+if(ctrl_options::GetSystemOption('whmcs_whmcs_reseller_view_api') === FALSE) {
+	ctrl_options::SetSystemOption('whmcs_whmcs_reseller_view_api', 'false', TRUE);
+}
+
 if(ctrl_options::GetSystemOption('whmcs_sendemail_bo') === FALSE) {
 	ctrl_options::SetSystemOption('whmcs_sendemail_bo', 'true', TRUE);
 }
