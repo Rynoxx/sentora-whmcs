@@ -85,6 +85,9 @@
  * - Added the ability to choose whether or not resellers can view the API key
  * - Some style edits to the module.zpm file (module page)
  * - Changed the module numbering to allow 2 digit numbers in versions
+ * 2.3.0
+ * - Bumped version to 2.3.0 to match the version of AWServer ZPanelX version of the plugin.
+ * - Included some ZPanelX compatability updates from MarkDark [Source](http://forums.sentora.org/showthread.php?tid=1563&pid=12786#pid12786)
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -105,7 +108,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '010310';
+	return '230';
 }
 
 function getProtocol($params) {

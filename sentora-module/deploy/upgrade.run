@@ -1,34 +1,26 @@
-<?PHP
-/*
- * Thanks go to VJ <meetthevj@gmail.com> for this include snippet
- */
-// determine Sentora root directory
+<?php
 
+// Determine ZPanelX root directory
 $currentDir = rtrim(dirname(__FILE__), '/\\');
 $folders = explode(DIRECTORY_SEPARATOR, $currentDir);
-$sentoraRoot = '';
+$zpanelRoot = '';
 $i = 0;
 while ($folders[$i] != 'modules' && !empty($folders[$i])) {
-	$sentoraRoot .= $folders[$i].DIRECTORY_SEPARATOR;
+	$zpanelRoot .= $folders[$i].DIRECTORY_SEPARATOR;
 	$i++;
 }
-require_once $sentoraRoot.'dryden/loader.inc.php';
-require_once $sentoraRoot.'cnf/db.php';
-require_once $sentoraRoot.'inc/dbc.inc.php';
-require_once $sentoraRoot.'dryden/db/driver.class.php';
-require_once $sentoraRoot.'dryden/ctrl/options.class.php';
-require_once $sentoraRoot.'dryden/sys/versions.class.php';
-/*
- * End Includes
- */
 
-//Create settings if not exist
+// Include files
+require_once $zpanelRoot.'dryden/loader.inc.php';
+require_once $zpanelRoot.'cnf/db.php';
+require_once $zpanelRoot.'inc/dbc.inc.php';
+require_once $zpanelRoot.'dryden/db/driver.class.php';
+require_once $zpanelRoot.'dryden/ctrl/options.class.php';
+require_once $zpanelRoot.'dryden/sys/versions.class.php';
+
+// Create settings if not exist
 if(ctrl_options::GetSystemOption('whmcs_reported') === FALSE) {
 	ctrl_options::SetSystemOption('whmcs_reported', 'false', TRUE);
-}
-
-if(ctrl_options::GetSystemOption('whmcs_reseller_view_api') === FALSE) {
-	ctrl_options::SetSystemOption('whmcs_reseller_view_api', 'false', TRUE);
 }
 
 if(ctrl_options::GetSystemOption('whmcs_sendemail_bo') === FALSE) {
@@ -36,7 +28,11 @@ if(ctrl_options::GetSystemOption('whmcs_sendemail_bo') === FALSE) {
 }
 
 if(ctrl_options::GetSystemOption('whmcs_link') === FALSE) {
-	ctrl_options::SetSystemOption('whmcs_link', 'http://localhost/', TRUE);
+	ctrl_options::SetSystemOption('whmcs_link', 'http://localhost/whmcs/', TRUE);
+}
+
+if(ctrl_options::GetSystemOption('whmcs_reseller_view_api') === FALSE) {
+	ctrl_options::SetSystemOption('whmcs_reseller_view_api', 'false', TRUE);
 }
 
 ?>

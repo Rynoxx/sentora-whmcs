@@ -1,42 +1,37 @@
-<?PHP
-/*
- * Thanks go to VJ <meetthevj@gmail.com> for this include snippet
- */
-// determine Sentora root directory
+<?php
+
+// Determine ZPanelX root directory
 $currentDir = rtrim(dirname(__FILE__), '/\\');
 $folders = explode(DIRECTORY_SEPARATOR, $currentDir);
-$sentoraRoot = '';
+$zpanelRoot = '';
 $i = 0;
 while ($folders[$i] != 'modules' && !empty($folders[$i])) {
-	$sentoraRoot .= $folders[$i].DIRECTORY_SEPARATOR;
+	$zpanelRoot .= $folders[$i].DIRECTORY_SEPARATOR;
 	$i++;
 }
-require_once $sentoraRoot.'dryden/loader.inc.php';
-require_once $sentoraRoot.'cnf/db.php';
-require_once $sentoraRoot.'inc/dbc.inc.php';
-require_once $sentoraRoot.'dryden/db/driver.class.php';
-require_once $sentoraRoot.'dryden/ctrl/options.class.php';
-require_once $sentoraRoot.'dryden/sys/versions.class.php';
-/*
- * End Includes
- */
 
-function RemoveSystemOption($name) {
+// Include files
+require_once $zpanelRoot.'dryden/loader.inc.php';
+require_once $zpanelRoot.'cnf/db.php';
+require_once $zpanelRoot.'inc/dbc.inc.php';
+require_once $zpanelRoot.'dryden/db/driver.class.php';
+require_once $zpanelRoot.'dryden/ctrl/options.class.php';
+require_once $zpanelRoot.'dryden/sys/versions.class.php';
+
+function RemoveSystemOption($name)
+{
 	global $zdbh;
 	if(ctrl_options::GetSystemOption($name) === FALSE) {
 		return true;
 	}
-
-	$bindArray = array(
-		':name' => $name,
-	);
+	$bindArray = array(':name' => $name,);
 	$zdbh->bindQuery("DELETE FROM x_settings WHERE so_name_vc = :name", $bindArray);
 }
 
-//remove the options we created
+// Remove the options we created
 RemoveSystemOption('whmcs_reported');
 RemoveSystemOption('whmcs_sendemail_bo');
 RemoveSystemOption('whmcs_link');
-RemoveSystemOption('whmcs_whmcs_reseller_view_api');
+RemoveSystemOption('whmcs_reseller_view_api');
 
 ?>
