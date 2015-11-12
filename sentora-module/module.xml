@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 	<name>WHMCS</name>
-	<version>010310</version>
-	<type>user</type>
+	<version>231</version>
 	<defaultcat>Server Admin</defaultcat>
-	<desc>WHMCS is a licensed billing system.</desc>
+	<type>user</type>
+	<desc>WHMCS is a licensed billing system. This module allows you to connect WHMCS to the hosting control panel.</desc>
 	<authorname>Rynoxx</authorname>
 	<authoremail>rynoxx@grid-servers.net</authoremail>
 	<authorurl>https://github.com/rynoxx</authorurl>

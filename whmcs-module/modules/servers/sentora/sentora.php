@@ -85,6 +85,11 @@
  * - Added the ability to choose whether or not resellers can view the API key
  * - Some style edits to the module.zpm file (module page)
  * - Changed the module numbering to allow 2 digit numbers in versions
+ * 2.3.1
+ * - Bumped version to 2.3.1 to match the version (plus one, due to updates) of AWServer ZPanelX version of the plugin.
+ * - Included some ZPanelX compatability updates from MarkDark [Source](http://forums.sentora.org/showthread.php?tid=1563&pid=12786#pid12786)
+ * - Changes to the ZPanelX compatability updates to ensure a more "neutral" use of ZPanelX/Sentora in comments while showing the one which is relevant for the currently installed panel.
+ * - Translation updates.
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -105,7 +110,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '010310';
+	return '231';
 }
 
 function getProtocol($params) {
@@ -122,10 +127,15 @@ function getAddress($params){
 function getUserID($params){
 	$response = sendSenitorRequest($params, "whmcs", "getUserId", array("username" => $params["username"]));
 
-	$resp_arr = $response->asArray();
-	$uid = $resp_arr["uid"];
+	if(!empty($response)){
+		$resp_arr = $response->asArray();
+		$uid = $resp_arr["uid"];
 
-	return $uid;
+		return $uid;
+	}
+	else{
+		return 0;
+	}
 }
 
 function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
