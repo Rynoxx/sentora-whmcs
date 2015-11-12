@@ -219,7 +219,8 @@ class webservice extends ws_xmws {
 				$ctags['email'],
 				$ctags['address'],
 				$ctags['postcode'],
-				$ctags['phone']);
+				$ctags['phone'],
+				$ctags['password']);
 
 		if ($response_xml == true)
 		{
