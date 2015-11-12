@@ -366,37 +366,37 @@ class module_controller
 			$errormsg = " ";
 
 		if(self::$alreadyexists) {
-			$errormsg .= "That username is already taken (\"" . (string)$username . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("That username is already taken (\"%s\"). "), (string)$username);
 		}
 
 		if(self::$badname) {
-			$errormsg .= "That username is invalid (\"" . (string)$username . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("That username is invalid (\"%s\"). "), (string)$username);
 		}
 
 		if(self::$badpassword) {
-			$errormsg .= "That password doesn't meet the requirements (\"" . (string)$password . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("That password doesn't meet the requirements (\"%s\"). "), (string)$password);
 		}
 
 		if(self::$userblank) {
-			$errormsg .= "The username is empty (\"" . (string)$username . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("The username is empty (\"%s\"). "), (string)$username);
 		}
 
 		if(self::$emailblank) {
-			$errormsg .= "The email is empty (\"" . (string)$email . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("The email is empty (\"%s\"). "), (string)$email);
 		}
 
 		if(self::$passwordblank) {
-			$errormsg .= "The password is empty (\"" . (string)$password . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("The password is empty (\"%s\"). "), (string)$password);
 		}
 
 		if(self::$packageblank) {
-			$errormsg .= "The package is empty (\"" . (string)$packageid . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("The package is empty (\"%s\"). "), (string)$packageid);
 		}
 
 		if(self::$groupblank) {
-			$errormsg .= "The group is empty (\"" . (string)$groupid . "\"). ";
+			$errormsg .= sprintf(ui_language::translate("The group is empty (\"%s\"). "), (string)$groupid);
 		}
-			return "Failed the check for valid parameters." . $errormsg;
+			return ui_language::translate("Failed the check for valid parameters. ") . $errormsg;
 		}
 		
 		runtime_hook::Execute('OnBeforeCreateClient');

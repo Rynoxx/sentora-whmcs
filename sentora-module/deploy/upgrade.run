@@ -1,22 +1,22 @@
 <?php
 
-// Determine ZPanelX root directory
+// Determine root directory
 $currentDir = rtrim(dirname(__FILE__), '/\\');
 $folders = explode(DIRECTORY_SEPARATOR, $currentDir);
-$zpanelRoot = '';
+$rootDir = '';
 $i = 0;
 while ($folders[$i] != 'modules' && !empty($folders[$i])) {
-	$zpanelRoot .= $folders[$i].DIRECTORY_SEPARATOR;
+	$rootDir .= $folders[$i].DIRECTORY_SEPARATOR;
 	$i++;
 }
 
 // Include files
-require_once $zpanelRoot.'dryden/loader.inc.php';
-require_once $zpanelRoot.'cnf/db.php';
-require_once $zpanelRoot.'inc/dbc.inc.php';
-require_once $zpanelRoot.'dryden/db/driver.class.php';
-require_once $zpanelRoot.'dryden/ctrl/options.class.php';
-require_once $zpanelRoot.'dryden/sys/versions.class.php';
+require_once $rootDir.'dryden/loader.inc.php';
+require_once $rootDir.'cnf/db.php';
+require_once $rootDir.'inc/dbc.inc.php';
+require_once $rootDir.'dryden/db/driver.class.php';
+require_once $rootDir.'dryden/ctrl/options.class.php';
+require_once $rootDir.'dryden/sys/versions.class.php';
 
 // Create settings if not exist
 if(ctrl_options::GetSystemOption('whmcs_reported') === FALSE) {

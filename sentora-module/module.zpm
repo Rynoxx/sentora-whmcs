@@ -10,74 +10,85 @@
 	<@ Result @>
 
 	<% if CanViewAPIKey %>
-	<% if BadVersionIsSet %>
-		<div id="whmcs-version-mismatch" style="display: none;"></div>
-		<script>
-			var msgString = "<b>Warning! </b>WHMCS has reported that it's version is <@ BadVersion @>, which doesn't match the version of the ZPanelX module (<@ Version @>)!<br>If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!";
-			if(typeof ZPanelX != "undefined"){
-				ZPanelX.notice.show({
-					type:"warning",
-					selector: "#whmcs-version-mismatch",
-					closeButton: true,
-					autoClose: false,
-					closeTime: 0,
-					message: msgString
-				});
-			} else {
-				document.getElementById("whmcs-version-mismatch").innerHTML = msgString;
-				document.getElementById("whmcs-version-mismatch").className = "alert alert-block alert-warning";
-			}
-			document.getElementById("whmcs-version-mismatch").style.display = "block";
-		</script>
-	<% endif %>
+		<% if BadVersionIsSet %>
+			<div id="whmcs-version-mismatch" style="display: none;"></div>
+			<script>
+				var panelName = typeof Sentora == "undefined" ? "ZPanelX" : "Sentora";
+				var msgString = "<b>Warning!</b> WHMCS has reported that it's version is <@ BadVersion @>, which doesn't match the version of the " + panelName + " module (<@ Version @>)!<br>If this warning doesn't go away on the next API call from WHMCS then this issue should be fixed as soon as possible!";
+				if(typeof Sentora != "undefined"){
+					Sentora.notice.show({
+						type:"warning",
+						selector: "#whmcs-version-mismatch",
+						closeButton: true,
+						autoClose: false,
+						closeTime: 0,
+						message: msgString
+					});
+				}
+				else if(typeof ZPanelX != "undefined"){
+					ZPanelX.notice.show({
+						type:"warning",
+						selector: "#whmcs-version-mismatch",
+						closeButton: true,
+						autoClose: false,
+						closeTime: 0,
+						message: msgString
+					});
+				} else {
+					document.getElementById("whmcs-version-mismatch").innerHTML = msgString;
+					document.getElementById("whmcs-version-mismatch").className = "alert alert-block alert-warning";
+				}
+				document.getElementById("whmcs-version-mismatch").style.display = "block";
+			</script>
+		<% endif %>
 
-	<% if IsAdmin %>
-	<div class="zform_wrapper">
-		<form action="./?module=whmcs&action=UpdateSettings" method="post">
-			<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
-			<h2><: Settings :></h2>
-			<table class="zgrid">
-				<tr>
-					<th><: Setting :></th>
-					<th><: Value :></th>
-					<th><: Description :></th>
-				</tr>
-				<tr>
-					<td><: Send Email :></td>
-					<td><@ SendEmailForm @></td>
-					<td><: Should control panel send your admin users emails about important issues like version conflicts :></td>
-				</tr>
-				<tr>
-					<td><: Reseller can view API-key :></td>
-					<td><@ ResellerViewAPIForm @></td>
-					<td><: Allow resellers to view the API-key panel. This is useful for instances where the ZPanelX installation is intended to be used in conjunction with resellers on WHMCS. Warning! This can open up security holes as the API-key is the same for all modules on your ZPanelX installation. Use at your own risk! :></td>
-				</tr>
-				<tr>
-					<td><: WHMCS Login Link :></td>
-					<td><@ WHMCSLinkForm @></td>
-					<td><p><: The link to your WHMCS login/clientarea page :></p></td>
-				</tr>
-				<table class="none">
-				<tr>
-					<td>&nbsp;</td>
-				</tr>
-					<td align="left">
-						<button class="btn btn-primary" type="submit" ><: Save :></button>
-						<button class="btn btn-primary" type="button" onclick="window.location.href='./';return false;"><: Cancel :></button>
-					</td>
-				</tr>
-			</table>
-            <@ CSFR_Tag @>
-        </form>
-	</div>
-	<% endif %>
+		<% if IsAdmin %>
+		<div class="zform_wrapper">
+				<form action="./?module=whmcs&action=UpdateSettings" method="post">
+					<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
+					<h2><: Settings :></h2>
+					<table class="zgrid">
+						<tr>
+							<th><: Setting :></th>
+							<th><: Value :></th>
+							<th><: Description :></th>
+						</tr>
+						<tr>
+							<td><: Send Email :></td>
+							<td><@ SendEmailForm @></td>
+							<td><: Should control panel send your admin users emails about important issues like version conflicts :></td>
+						</tr>
+						<tr>
+							<td><: Reseller can view API-key :></td>
+							<td><@ ResellerViewAPIForm @></td>
+							<td><: Allow resellers to view the API-key panel. This is useful for instances where the ZPanelX installation is intended to be used in conjunction with resellers on WHMCS. Warning! This can open up security holes as the API-key is the same for all modules on your ZPanelX installation. Use at your own risk! :></td>
+						</tr>
+						<tr>
+							<td><: WHMCS Login Link :></td>
+							<td><@ WHMCSLinkForm @></td>
+							<td><p><: The link to your WHMCS login/clientarea page :></p></td>
+						</tr>
+						<table class="none">
+						<tr>
+							<td>&nbsp;</td>
+						</tr>
+							<td align="left">
+								<button class="btn btn-primary" type="submit" ><: Save :></button>
+								<button class="btn btn-primary" type="button" onclick="window.location.href='./';return false;"><: Cancel :></button>
+							</td>
+						</tr>
+					</table>
+		            <@ CSFR_Tag @>
+		        </form>
+			</div>
+		<% endif %>
 		
-	<a href="<@ WHMCSModule @>" style="margin-bottom: 8px;"><: Download WHMCS Module :></a>
-	<p>&nbsp;</p>
-	<: After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area. Your API key you may look in your module API Key. Put 1,api key (1 is the reseller id for admin) in the whmcs server config. Anytime WHMCS accesses ZPanelX it will tell ZPanelX its current module version and a notice will be generated if the versions aren`t matching. It is up to you to update your WHMCS module when updating ZPanelX module. :></p>
-	<pre id="api-key" style="display:none; padding: 8px; margin-top: 8px;"><@ CurrentAPIKey @></pre>
-	<button class="btn btn-primary" style="margin-top: 8px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;"><: API Key :></button><br>
-	<br>
+		<a href="<@ WHMCSModule @>" style="margin-bottom: 8px;"><: Download WHMCS Module :></a>
+		<p>&nbsp;</p>
+		<: After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area. Your API key you may look in your module API Key. Put 1,api key (1 is the reseller id for admin) in the whmcs server config. Anytime WHMCS accesses ZPanelX it will tell ZPanelX its current module version and a notice will be generated if the versions aren`t matching. It is up to you to update your WHMCS module when updating ZPanelX module. :></p>
+		<pre id="api-key" style="display:none; padding: 8px; margin-top: 8px;"><@ CurrentAPIKey @></pre>
+		<button class="btn btn-primary" style="margin-top: 8px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;"><: API Key :></button><br>
+		<br>
 		<a href="<@ WHMCSLink @>/admin" class="btn btn-primary"><: Login to WHMCS :></a>
 	<% else %>
 		<a href="<@ WHMCSLink @>/clientarea.php" class="btn btn-primary"><: Login to WHMCS :></a>

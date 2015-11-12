@@ -23,21 +23,21 @@ function get_server_load()
 		$fileModTime = filemtime("./load.cache");
 		$cache = @file_get_contents("./load.cache");
 
-	if(file_exists("./load.cache") && !empty($cache) && $fileModTime && (time() - $fileModTime) < 60){
-		$load = $cache;
-	} else {
-		$wmi = new COM("Winmgmts://");
-		$server = $wmi->execquery("SELECT LoadPercentage FROM Win32_Processor");
-		$cpu_num = 0;
-		$load_total = 0;
+		if(file_exists("./load.cache") && !empty($cache) && $fileModTime && (time() - $fileModTime) < 60){
+			$load = $cache;
+		} else {
+			$wmi = new COM("Winmgmts://");
+			$server = $wmi->execquery("SELECT LoadPercentage FROM Win32_Processor");
+			$cpu_num = 0;
+			$load_total = 0;
 
-	foreach($server as $cpu) {
-		$cpu_num++;
-		$load_total += $cpu->loadpercentage;
-	}
-		$load = round($load_total/$cpu_num, 2);
+			foreach($server as $cpu) {
+				$cpu_num++;
+				$load_total += $cpu->loadpercentage;
+			}
+				$load = round($load_total/$cpu_num, 2);
 
-	file_put_contents("./load.cache", $load);
+			file_put_contents("./load.cache", $load);
 		}
 	} else {
 		$sys_load = sys_getloadavg();
@@ -83,7 +83,7 @@ if(stristr(PHP_OS, 'win') != false) {
 		$uptime_txt = @file_get_contents('/proc/uptime');
 		$uptime = trim(substr($uptime_txt, 0, strpos($uptime_txt," ")));
 
-	if (!$uptime && function_exists('shell_exec')) $uptime = shell_exec("cut -d. -f1 /proc/uptime");
+		if (!$uptime && function_exists('shell_exec')) $uptime = shell_exec("cut -d. -f1 /proc/uptime");
 		$uptime_array = format_uptime($uptime);
 	}
 echo "<uptime>{$uptime_array["days"]} Days {$uptime_array["hours"]}:{$uptime_array["mins"]}:{$uptime_array["secs"]}</uptime>\n";
