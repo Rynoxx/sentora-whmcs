@@ -1,5 +1,11 @@
 # Changelog #
 
+## 2.3.1##
+- Bumped version to 2.3.1 to match the version (plus one, due to updates) of AWServer ZPanelX version of the plugin.
+- Included some ZPanelX compatability updates from MarkDark [Source](http://forums.sentora.org/showthread.php?tid=1563&pid=12786#pid12786)
+- Changes to the ZPanelX compatability updates to ensure a more "neutral" use of ZPanelX/Sentora in comments while showing the one which is relevant for the currently installed panel.
+- Translation updates.
+
 ## 1.3.10 ##
 - Added the ability to choose whether or not resellers can view the API key
 - Some style edits to the module.zpm file (module page)
