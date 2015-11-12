@@ -1,12 +1,12 @@
 <?php
 
-/*
- *	Original Sentora WHMCS module 1.1.2
- *	Originally written by Mathieu L�gar� (levelkro@yahoo.ca)
- *	Rewritten by Rynoxx (rynoxx@grid-servers.net)
- *  Modifications by Mark Grigoriev - http://awserver.tk
- *	Uses the PHP XMWS API Client by Ballen (ballen@zpanelcp.com)
- *	Tested with WHMCS 5.3.14 - 6.1.2
+/**
+ * @package sentora
+ * @subpackage modules
+ * @author Rynoxx (rynoxx@grid-servers.net) (Previous: knivey (knivey@botops.net))
+ * @copyright knivey (knivey@botops.net)
+ * @link http://www.sentora.org/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
 class module_controller
