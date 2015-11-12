@@ -16,7 +16,7 @@ ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ### Additions/Edits for Sentora ###
 [Rynoxx](https://github.com/rynoxx)  
-_Do note that currently I've basicly only tested it and renamed variables and edited comments_
+[MarkDark](http://forums.sentora.org/member.php?action=profile&uid=307) - ZPanelX compatability updates  
 
 - - -
 
