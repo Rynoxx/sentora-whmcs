@@ -11,7 +11,7 @@ Status page tested on Windows 7 running WAMP and CentOS 7 running Sentora
 ## Credits ##
 
 ### Original version(s) ###
-WHMCS Module: [Mathieu L�gar�](mailto:levelkro@yahoo.ca)  
+WHMCS Module: [Mathieu Légaré](mailto:levelkro@yahoo.ca)  
 ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ### Additions/Edits for Sentora ###
@@ -22,7 +22,7 @@ ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ## Requirements ##
 [WHMCS](http://whmcs.com/ "WHMCS Website") installed (doesn't have to be on the same machine as the sentora installation(s))
-The WHMCS installation running on PHP 5.4 or above
+The WHMCS and Sentora installation running on PHP 5.4 or above
 
 - - -
 

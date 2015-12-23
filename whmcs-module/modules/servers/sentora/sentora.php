@@ -1,14 +1,14 @@
 <?php
 /*
  * Edited version for Sentora:
- *	Sentora WHMCS module 1.1.2
- *	Originally written by Mathieu L�gar� (levelkro@yahoo.ca)
+ *	Sentora WHMCS module
+ *	Originally written by Mathieu Légaré (levelkro@yahoo.ca)
  *	Edits written by Rynoxx (rynoxx@grid-servers.net)
  *	Uses the PHP XMWS API Client by ballen (ballen@zpanelcp.com)
- *	Tested with WHMCS 5.3.13 & 5.3.14, Sentora 1.0 and CentOS 7
+ *	Tested with WHMCS 5.3.13, 5.3.14, 6.1 & 6.2, Sentora 1.0 - 1.0.3 and CentOS 7/Debian 8
  *
  *
- * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE PREVIOUS AUTHOR(S)
+ * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE ORIGINAL AUTHOR(S)
  *	zPanel WHMCS module 1.0.1
  *	Writted by Mathieu L�gar� (levelkro@yahoo.ca)
  *	Use the PHP XMWS API Client by ballen (ballen@zpanelcp.com)
@@ -110,7 +110,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '231';
+	return '232';
 }
 
 function getProtocol($params) {

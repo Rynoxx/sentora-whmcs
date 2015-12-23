@@ -262,7 +262,8 @@ class module_controller
 		$stmt = $zdbh->query($sql);
 		$addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		$isSentora = empty(ctrl_options::GetSystemOption('zpanel_domain'));
+		$zpdomain = ctrl_options::GetSystemOption('zpanel_domain');
+		$isSentora = empty($zpdomain);
 
 		$phpmailer = new sys_email();
 		$phpmailer->Subject = ($isSentora ? "Sentora" : "ZPanelX") . " - WHMCS version mismatch";
@@ -468,7 +469,8 @@ class module_controller
 				$protocol = 'http://';
 			}
 
-			$domain = empty(ctrl_options::GetSystemOption('zpanel_domain')) ? ctrl_options::GetSystemOption('sentora_domain') : ctrl_options::GetSystemOption('zpanel_domain');
+			$zpdomain = ctrl_options::GetSystemOption('zpanel_domain');
+			$domain = empty($zpdomain) ? ctrl_options::GetSystemOption('sentora_domain') : ctrl_options::GetSystemOption('zpanel_domain');
 
 			$emailsubject = str_replace("{{username}}", $username, $emailsubject);
 			$emailsubject = str_replace("{{password}}", $password, $emailsubject);
