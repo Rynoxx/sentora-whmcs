@@ -2,8 +2,8 @@
 _A WHMCS module for the Sentora control Panel AND a Sentora module for WHMCS_  
 _These modules allow WHMCS to create users, suspend, unsuspend, terminate, change password and change packages on Sentora_
 
-WHMCS Module tested on version 5.3.12, 5.3.13 and 5.3.14, OS: CentOS 6.5  
-Sentora Module tested on Sentora 1.0.0, OS: CentOS 7  
+WHMCS Module tested on version 5.3.12, 5.3.13 and 5.3.14, OS: CentOS 6.5, CentOS 7, Debian 8  
+Sentora Module tested on Sentora 1.0.0 - 1.0.3, OS: CentOS 7, Debian 8  
 Sentora Module tested on AWServer ZPanelX v2.1, OS: Windows 7  
 Status page tested on Windows 7 running WAMP and CentOS 7 running Sentora
 
