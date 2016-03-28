@@ -33,7 +33,7 @@ class module_controller
 	* Begin functions for WebPage
 	***********************************************************/
 
-   /*
+   /**
 	* Get our module name
 	* @return string name of the current module
 	*/	 
@@ -41,53 +41,53 @@ class module_controller
 	{
 		$module_name = ui_language::translate(ui_module::GetModuleName());
 		return $module_name;
-    }
+	}
 
-   /*
+   /**
 	* Get our icon path + filename
 	* @global type $controller
 	* @return string path to the icon file
 	*/	
-    static function getModuleIcon()
+	static function getModuleIcon()
 	{
 		global $controller;
 		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
 		return $module_icon;
-    }
+	}
 
-   /*
+   /**
 	* Get our module path
 	* @global type $controller
 	* @return string path to the module
 	*/
-    static function getModulePath()
+	static function getModulePath()
 	{
 		global $controller;
 		$module_path = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/";
 		return $module_path;
-    }
+	}
 
-   /*
+   /**
 	* Returns our module description
 	* @return string the module description from the database (originally improted from the module.xml file). 
 	*/
-    static function getModuleDesc()
+	static function getModuleDesc()
 	{
 		$message = ui_language::translate(ui_module::GetModuleDescription());
 		return $message;
-    }
+	}
 
-   /*
+   /**
 	* Builds a 'hidden' form type which is populated with the generated token.
 	* @author Bobby Allen (ballen@zpanelcp.com)
 	* @return string the HTML form tag.
 	*/
-    static function getCSFR_Tag()
+	static function getCSFR_Tag()
 	{
 		return runtime_csfr::Token();
-    }
+	}
 	 
-   /*
+   /**
 	* Retrieves the current API key from the options
 	* @author Bobby Allen (ballen@zpanelcp.com)
 	* @return string the API-Key
@@ -97,7 +97,7 @@ class module_controller
 		return ctrl_options::GetOption('apikey');
 	}
 
-   /*
+   /**
 	* Checks if there is a bad version notice set
 	*/
 	static function getBadVersionIsSet() 
@@ -110,7 +110,7 @@ class module_controller
 		}
 	}
 
-   /*
+   /**
 	* Generate form for sendemail options
 	* @return string HTML FORM ITEM
 	*/
@@ -120,7 +120,7 @@ class module_controller
 		return ctrl_options::OuputSettingMenuField('SendEmail', 'true|false', $cval);
 	}
 
-   /*
+   /**
 	* Generate form for resellerviewapi option
 	* @return string HTML FORM ITEM
 	*/
@@ -130,7 +130,7 @@ class module_controller
 		return ctrl_options::OuputSettingMenuField('ResellerViewAPI', 'true|false', $cval);
 	}
 
-   /*
+   /**
 	* Generate form for whmcs login link
 	* @return string HTML FORM ITEM
 	*/
@@ -140,7 +140,7 @@ class module_controller
 		return ctrl_options::OutputSettingTextField('Link', $cval);
 	}
 
-   /*
+   /**
 	* Accepts admin settings form
 	* @return null
 	*/
@@ -162,7 +162,7 @@ class module_controller
 		self::$Results[] = ui_sysmessage::shout(ui_language::translate("Changes to your settings have been saved successfully!"));
 	}
 
-   /*
+   /**
 	* Gets the version reported by WHMCS or if version matches us 'false'
 	* @return string version reported by WHMCS
 	*/
@@ -171,7 +171,7 @@ class module_controller
 		return ctrl_options::GetSystemOption('whmcs_reported');
 	}
 
-   /*
+   /**
 	* Gets the link to the WHMCS installation
 	* @return string The link admin defined in settings
 	*/
@@ -180,7 +180,7 @@ class module_controller
 		return ctrl_options::GetSystemOption('whmcs_link');
 	}
 
-   /*
+   /**
 	* Get the zip file for WHMCS module download
 	* @return string path to the file
 	*/
@@ -191,16 +191,17 @@ class module_controller
 		return $module_icon;
 	}
 
-   /*
+   /**
 	* Gets the user ID of the current user
 	* @return int - the UserID of the current user
 	*/
 	static function getCurrentUserID()
 	{
-		return ctrl_users::GetUserDetail()["userid"];
+		$current_user = ctrl_users::GetUserDetail();
+		return $current_user["userid"];
 	}
 
-   /*
+   /**
 	* Get the current version of the module
 	* @return string version number
 	*/
@@ -210,7 +211,7 @@ class module_controller
 		return $tags['version'];
 	}
 
-   /*
+   /**
 	* Check if the user has full admin access
 	* @return boolean true if admin false if not
 	*/
@@ -223,7 +224,7 @@ class module_controller
 		}
 	}
 
-   /*
+   /**
 	* Check if the user can view the API key
 	* @return boolean - true if user is admin or (reseller and resellers can view API key)
 	*/
@@ -235,7 +236,7 @@ class module_controller
 
 	static $Results = Array();
 
-   /*
+   /**
 	* Gets the result of any operations we have ran
 	* @return string HTML output seperated by br tags
 	*/
@@ -248,13 +249,13 @@ class module_controller
 	* End functions for WebPage
 	***********************************************************/
 
-   /*
+   /**
 	* Sends an email to all admins noticing of mismatched whmcs - zpanelx/sentora versions
 	* @global db_driver $zdbh
 	* @param type $version WHMCS version detected
 	* @return null
 	*/
-	function sendBadVersionMail($version)
+	static function sendBadVersionMail($version)
 	{
 		global $zdbh;
 		$sversion = self::getVersion();
@@ -274,7 +275,7 @@ class module_controller
 		$phpmailer->SendEmail();
 	}
 
-   /*
+   /**
 	* Fetches the uid for username
 	* @param string $name username
 	* @global db_driver $zdbh
@@ -332,7 +333,7 @@ class module_controller
 	* ExecuteUpdateClient - dropped self::Enable/Disable client and just added the hooks to top/bottom
 	**********/
 
-   /*
+   /**
 	* Checks if a username exists in the database
 	* @return bool true if username exists false if available
 	*/
@@ -656,7 +657,7 @@ class module_controller
 
 	static function DefaultEmailBody()
 	{
-        $line = ui_language::translate("Hi {{fullname}},\r\rWe are pleased to inform you that your hosting account is now activated!\r\rYou can access your web hosting control panel using this link:\r{{controlpanelurl}}\r\rYour username and password is as follows:\rUsername: {{username}}\rPassword: {{password}}\r\rMany thanks,\rThe management");
+		$line = ui_language::translate("Hi {{fullname}},\r\rWe are pleased to inform you that your hosting account is now activated!\r\rYou can access your web hosting control panel using this link:\r{{controlpanelurl}}\r\rYour username and password is as follows:\rUsername: {{username}}\rPassword: {{password}}\r\rMany thanks,\rThe management");
 		return $line;
 	}
 
@@ -681,6 +682,164 @@ class module_controller
 			return $rowpack['pk_id_pk'];
 		}
 		return false;
+	}
+
+	/*****************************
+	 * Our version of dns_manager
+	 *****************************/
+
+	/** 
+	 *
+	 * NOTE: Unchanged from original.
+	 * @param int $id The domain ID
+	 * @return bool Returns true if dns_hasupdates is changed.
+	 */
+	static function TriggerDNSUpdate($id)
+	{
+		global $zdbh;
+		global $controller;
+		$records_list = ctrl_options::GetSystemOption('dns_hasupdates');
+		$record_array = explode(',', $records_list);
+		if (!in_array($id, $record_array)) {
+			if (empty($records_list)) {
+				$records_list .= $id;
+			} else {
+				$records_list .= ',' . $id;
+			}
+			$sql = "UPDATE x_settings SET so_value_tx=:newlist WHERE so_name_vc='dns_hasupdates'";
+			$sql = $zdbh->prepare($sql);
+			$sql->bindParam(':newlist', $records_list);
+			$sql->execute();
+			return true;
+		}
+	}
+
+	/**
+	 * Gets the ID of the specified domain name for the specified user
+	 * NOTE: Unchanged from original.
+	 * @param int $uid The ID of the user
+	 * @param string $domainName The domainname to lookup the id for.
+	 * @return int DomainID, will return 0 if the domain wasn't found.
+	 */
+	static function getDomainId($uid, $domainName){
+		global $zdbh;
+
+		$sql = $zdbh->prepare("SELECT * FROM x_vhosts WHERE vh_acc_fk=:uid AND vh_type_in !=2 AND vh_deleted_ts IS NULL AND vh_name_vc=:name");
+		$sql->bindParam(':uid', $uid);
+		$sql->bindParam(':name', $domainName);
+		$sql->execute();
+		$domainId = $sql->fetch();
+
+		return empty($domainId['vh_id_pk']) ? 0 : $domainId['vh_id_pk'];
+	}
+
+	/**
+	 * Creates a new DNS record from an array of key value pairs.
+	 * @param array $rec Array of record properties (uid, domainName, domainID, type, hostName, ttl, target)
+	 * @return void
+	 */
+	static function createDNSRecord(array $rec)
+	{
+		global $zdbh;
+		$sql = $zdbh->prepare('INSERT INTO x_dns (dn_acc_fk,
+						   dn_name_vc,
+						   dn_vhost_fk,
+						   dn_type_vc,
+						   dn_host_vc,
+						   dn_ttl_in,
+						   dn_target_vc,
+						   dn_priority_in,
+						   dn_weight_in,
+						   dn_port_in,
+						   dn_created_ts) VALUES (
+						   :userid,
+						   :domainName,
+						   :domainID,
+						   :type_new,
+						   :hostName_new,
+						   :ttl_new,
+						   :target_new,
+						   :priority_new,
+						   :weight_new,
+						   :port_new,
+						   :time)'
+		);
+		$priority_new = array_key_exists('priority', $rec) ? $rec['priority'] : 0;
+		$weight_new = array_key_exists('weight', $rec) ? $rec['weight'] : 0;
+		$port_new = array_key_exists('port', $rec) ? $rec['port'] : 0;
+		$time = array_key_exists('time', $rec) ? $rec['time'] : time();
+		$sql->bindParam(':userid', $rec['uid']);
+		$sql->bindParam(':domainName', $rec['domainName']);
+		$sql->bindParam(':domainID', $rec['domainID']);
+		$sql->bindParam(':type_new', $rec['type']);
+		$sql->bindParam(':hostName_new', $rec['hostName']);
+		$sql->bindParam(':ttl_new', $rec['ttl']);
+		$sql->bindParam(':target_new', $rec['target']);
+		$sql->bindParam(':priority_new', $priority_new);
+		$sql->bindParam(':weight_new', $weight_new);
+		$sql->bindParam(':port_new', $port_new);
+		$sql->bindParam(':time', $time);
+		$sql->execute();
+		self::TriggerDNSUpdate($rec['domainID']);
+	}
+
+	/**
+	 * Creates the default DNS records for the specified UserID/DomainID combo
+	 * @param $userID
+	 * @param $domainID
+	 * @return void
+	 */
+	static function createDefaultRecords($userID, $domainID){
+		global $zdbh;
+		global $controller;
+
+		$numrows = $zdbh->prepare('SELECT * FROM x_vhosts WHERE vh_id_pk=:domainID AND vh_type_in !=2 AND vh_deleted_ts IS NULL');
+		$numrows->bindParam(':domainID', $domainID);
+		$numrows->execute();
+		$domainName = $numrows->fetch();
+		$domainName = $domainName['vh_name_vc'];
+
+		if (!fs_director::CheckForEmptyValue(ctrl_options::GetSystemOption('server_ip'))) {
+			$targetIP = ctrl_options::GetSystemOption('server_ip');
+		} else {
+			$targetIP = $_SERVER["SERVER_ADDR"]; //This needs checking on windows 7 we may need to use LOCAL_ADDR :- Sam Mottley
+		}
+
+		//Get list of DNS rows to create
+		$RowCount = $zdbh->prepare('SELECT count(*) FROM x_dns_create WHERE dc_acc_fk=:userId');
+		$RowCount->bindparam(':userId', $userID);
+		$RowCount->execute();
+		if ($RowCount->fetchColumn() > 0) {
+			//The current user have specifics entries, use them only
+			$CreateList = $zdbh->prepare('SELECT * FROM x_dns_create WHERE dc_acc_fk=:userId');
+			$CreateList->bindparam(':userId', $userID);
+			$CreateList->execute();
+		} else {
+			//no entry specific to this user is present, use default entries (user number = 0)
+			$CreateList = $zdbh->query('SELECT * FROM x_dns_create WHERE dc_acc_fk=0');
+		}
+
+		while ($CreateItem = $CreateList->fetch()) {
+			$Target = str_replace(':IP:', $targetIP, $CreateItem['dc_target_vc']);
+			$Target = str_replace(':DOMAIN:', $domainName, $Target);
+			$Row = array(
+				'uid' => $userID,
+				'domainName' => $domainName,
+				'domainID' => $domainID,
+				'type' => $CreateItem['dc_type_vc'],
+				'hostName' => $CreateItem['dc_host_vc'],
+				'ttl' => $CreateItem['dc_ttl_in'],
+				'target' => $Target);
+			if (!empty($CreateItem['dc_priority_in']))
+				$Row['priority'] = $CreateItem['dc_priority_in'];
+			if (!empty($CreateItem['dc_weight_in']))
+				$Row['weight'] = $CreateItem['dc_weight_in'];
+			if (!empty($CreateItem['dc_port_in']))
+				$Row['port'] = $CreateItem['dc_port_in'];
+			self::createDNSRecord($Row);
+		}
+
+		return;
 	}
 }
 

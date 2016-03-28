@@ -8,7 +8,7 @@
  *	Tested with WHMCS 5.3.13, 5.3.14, 6.1 & 6.2, Sentora 1.0 - 1.0.3 and CentOS 7/Debian 8
  *
  *
- * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE ORIGINAL AUTHOR(S)
+ * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE PREVIOUS AUTHOR(S)
  *	zPanel WHMCS module 1.0.1
  *	Writted by Mathieu L�gar� (levelkro@yahoo.ca)
  *	Use the PHP XMWS API Client by ballen (ballen@zpanelcp.com)
@@ -85,11 +85,20 @@
  * - Added the ability to choose whether or not resellers can view the API key
  * - Some style edits to the module.zpm file (module page)
  * - Changed the module numbering to allow 2 digit numbers in versions
+ *
  * 2.3.1
  * - Bumped version to 2.3.1 to match the version (plus one, due to updates) of AWServer ZPanelX version of the plugin.
  * - Included some ZPanelX compatability updates from MarkDark [Source](http://forums.sentora.org/showthread.php?tid=1563&pid=12786#pid12786)
  * - Changes to the ZPanelX compatability updates to ensure a more "neutral" use of ZPanelX/Sentora in comments while showing the one which is relevant for the currently installed panel.
  * - Translation updates.
+ * 
+ * 2.3.2
+ * - Fixed #2
+ *
+ * 2.3.3
+ * - Allows the option to automatically create default DNS records upon account creation
+ * - Note added to the 'Reseller' option.
+ * - Misc small changes.
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -110,7 +119,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '232';
+	return '233';
 }
 
 function getProtocol($params) {
@@ -125,13 +134,25 @@ function getAddress($params){
 }
 
 function getUserID($params){
-	$response = sendSenitorRequest($params, "whmcs", "getUserId", array("username" => $params["username"]));
+	$response = sendSenitorRequest($params, "whmcs", "GetUserId", array("username" => $params["username"]));
 
 	if(!empty($response)){
 		$resp_arr = $response->asArray();
-		$uid = $resp_arr["uid"];
 
-		return $uid;
+		return $resp_arr["uid"];
+	}
+	else{
+		return 0;
+	}
+}
+
+function getDomainID($userid, $domain){
+	$response = sendSenitorRequest($params, "whmcs", "GetDomainId", array("uid" => $userid, "domain" => $domain));
+
+	if(!empty($response)){
+		$resp_arr = $response->asArray();
+
+		return $resp_arr["domainid"];
 	}
 	else{
 		return 0;
@@ -144,6 +165,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
+	$debug = true;
 
 	$resp = null;
 
@@ -155,14 +177,26 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		// Workaround for an exception caused by having multiple Senitor requests per PHP page.
 		MessageBag::getInstance()->reset();
 	}
-	catch(Exception $e){ }
+	catch(Exception $e){
+		$str_error = "Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
 
-	$replacevars = array("serveraccesshash", "serverusername", "serverpassword", "password");
+		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $str_error, "", $replacevars);
+
+		return null;
+	}
+
+	#$replacevars = array($server_apikey, $params["serveraccesshash"], $params["serverusername"], $params["serverpassword"], $params["password"], $params["clientsdetails"]["phonenumber"]);
+	$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
 
 	$use_default_modules = $params["configoption3"] === "on" || $params["configoption3"] === "yes";
 
 	if($use_default_modules && !empty($default_modules[$module . "." . $endpoint])){
 		$module = $default_modules[$module . "." . $endpoint];
+	}
+
+	if($debug){
+		$xmws->debugMode();
+		ob_start();
 	}
 
 	try{
@@ -173,14 +207,20 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		$resp = $xmws->send();
 	}
 	catch(Exception $e){
-		$str_error = "Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "\n";
+		$str_error = "Caught exception: " . $e->getMessage() . "\n\n" . $e->getTraceAsString();
+
+		if($debug){
+			$str_error .= PHP_EOL . "Debug string from Senitor: " . ob_get_clean();
+		}
+
+		$str_error .= PHP_EOL . " " . print_r(expression);
 
 		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $str_error, "", $replacevars);
 
 		return null;
 	}
 
-	logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $resp->asArray(), "", $replacevars);
+	logModuleCall("Sentora", $module . "." . $endpoint, $array_data, print_r($resp->asArray(), true), "", $replacevars);
 
 	return $resp;
 }
@@ -188,8 +228,24 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 function sentora_ConfigOptions() {
 	// Option for the product
 	$configarray = array(
-		"package_name" => array("FriendlyName" => "Package Name", "Type" => "text", "Size" => "25", "Description" => "The name of the package in Sentora"),
-		"reseller" => array("FriendlyName" => "Reseller", "Type" => "yesno", "Description" => "Yes, is a reseller")
+		"package_name" => array(
+			"FriendlyName" => "Package Name",
+			"Type" => "text",
+			"Size" => "25",
+			"Description" => "The name of the package in Sentora"
+		),
+		"reseller" => array(
+			"FriendlyName" => "Reseller",
+			"Type" => "yesno",
+			"Description" => "Yes, is a reseller. <br>This will give the people who buy this package reseller access to sentora. Leave this unticked if you're unsure.",
+			"default" => "no"
+		),
+		"autocreate_dns" => array(
+			"FriendlyName" => "Auto-Create DNS Records",
+			"Type" => "yesno",
+			"Description" => "Yes, automatically create default domain records.",
+			"default" => "yes"
+		)
 	);
 
 	return $configarray;
@@ -198,7 +254,7 @@ function sentora_ConfigOptions() {
 function sendVersionToSentora($params) {
 	$array_data = array("whmcs_version" => getModuleVersion());
 
-	$response = sendSenitorRequest($params, "whmcs", "checkVersion", $array_data);
+	$response = sendSenitorRequest($params, "whmcs", "CheckVersion", $array_data);
 
 	if($response != null){
 		return $response->asString() == "true";
@@ -211,19 +267,22 @@ function sendVersionToSentora($params) {
 }
 
 function sentora_CreateAccount($params) {
+
 	// Create account, used by the automation system and manual button
 	// Account details
 	$producttype = $params["producttype"];   # Product Type: hostingaccount, reselleraccount, server or other
 	$domain = $params["domain"];   # Domain defined in the product
-	$username = $params["username"];  # Username defined in the product
+	$username = empty($params["username"]) ? substr(str_replace(".", "", $domain), 0, 49) : $params["username"];  # Username defined in the product, default to domainname if no username is defined.
 	$password = $params["password"];  # Password defined in the product
 	$clientsdetails = $params["clientsdetails"];  # Array of clients details - firstname, lastname, email, country, etc...
 	// Product option
-	$configoption1 = $params["configoption1"];  # Package name
-	$configoption2 = $params["configoption2"];  # If is Reseller
 	$groupid = "3"; # Default to Client no need to have an else statement for this.
-	if ($configoption2 === "on" || stripos($producttype, "reseller") !== false){
+	if ($params["configoption2"] === "on" || stripos($producttype, "reseller") !== false){
 		$groupid = "2";
+	}
+
+	if(empty($username)){
+		return "No username is defined for '" . $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "'.";
 	}
 
 	// Server details
@@ -233,7 +292,7 @@ function sentora_CreateAccount($params) {
 	//CreateClient Checks if that username exists and creates it, otherwise returns a failure
 	$data = array(
 		"resellerid" => $server_reseller,
-		"packageid" => $configoption1,
+		"packageid" => $params["configoption1"],
 		"groupid" => $groupid,
 		"username" => $username,
 		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'],
@@ -242,53 +301,69 @@ function sentora_CreateAccount($params) {
 		"postcode" => $clientsdetails["postcode"],
 		"password" => $password,
 		"phone" => $clientsdetails["phonenumber"],
-		"sendmail" => 0,
-		"emailsubject" => 0,
-		"emailbody" => 0
+		"sendmail" => "0",
+		"emailsubject" => "0",
+		"emailbody" => "0"
 	);
 
 	$response = null;
 
 	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
+	#$response = sendSenitorRequest($params, "manage_clients", "CreateClient", $data);
 
 	// If it returns anything except 'success' then the user already exists
 	if($response == null){
 		return "Account couldn't be created, the API Request failed.";
 	}
 
-	if ($response->asString() != 'success') {
+	$stringResponse = $response->asString();
+
+	if (!empty($stringResponse) && $response->asString() != 'success') {
 		return $response->asString();
 	}
 
 	$response = null;
 
-	$result = 'success';
-
 	// Now add the domain (if setup in WHMCS)
-	// This is a guess but i think if no domain is set it will be null?
-	if($domain != null) {
+	if(!empty($domain)) {
 		$uid = getUserID($params);
 
 		if(empty($uid)) {
-			return "Account Created?, error getting uid for domain setup.";
+			return "Account Created? Error getting user id for domain setup.";
 		}
 
-		$response = sendSenitorRequest($params, "domains", "CreateDomain",
+		$domainResponse = sendSenitorRequest($params, "domains", "CreateDomain",
 			array(
 				"uid" => $uid,
 				"domain" => $domain,
 				"destination" => " ",
 				"autohome" => 1
-			));
+			)
+		);
 
-		$content = $response->asArray();
+		$content = $domainResponse->asArray();
 
 		if ($content['created'] == "false") {
-			$result = "Account created, but can't add the domain (FQDN Must not already exist).";
+			return "Account created, but couldn't add the domain (FQDN Must not already exist on the Sentora server).";
+		}
+
+		if($params["configoption3"] === "on"){
+			$domainid = getDomainID($uid, $params["domain"]);
+
+			if(empty($domainid)){
+				return "Account and domain created? Error getting domain id for DNS setup.";
+			}
+
+			$dnsRecordsResponse = sendSenitorRequest($params, "whmcs", "CreateDefaultRecords",
+				array(
+					"uid" => $uid,
+					"domainid" => $domainid
+				)
+			);
 		}
 	}
 
-	return $result;
+	return "success";
 }
 
 function sentora_TerminateAccount($params) {
@@ -402,10 +477,8 @@ function sentora_ChangePackage($params) {
 	$password = $params["password"];       # Password defined in the product
 	$clientsdetails = $params["clientsdetails"];     # Array of clients details - firstname, lastname, email, country, etc...
 	// Product option
-	$configoption1 = $params["configoption1"];     # Package name
-	$configoption2 = $params["configoption2"];     # If is Reseller
 	$groupid = "3"; # Default to Client no need to have an else statement for this.
-	if ($configoption2 == "yes" || strpos($producttype, "reseller") >= 0){
+	if ($params["configoption2"] == "yes" || strpos($producttype, "reseller") >= 0){
 		$groupid = "2";
 	}
 
@@ -425,7 +498,7 @@ function sentora_ChangePackage($params) {
 
 	// Starting to update account on Sentora
 	$data = array(
-		"packageid" => $configoption1,
+		"packageid" => $params["configoption1"],
 		"groupid" => $groupid,
 		"uid" => $uid,
 		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] or "",
@@ -444,16 +517,9 @@ function sentora_ChangePackage($params) {
 
 function sentora_ClientArea($params) {
 	sendVersionToSentora($params);
-	
-	/*$response = sendSenitorRequest($params, "whmcs", "getCSRFToken", ["auto-login-enabled" => $params["configoption3"] == "on"]);
 
-	$arr = $response->asArray();*/
-
-	$code = '<form action="' . getAddress($params) . '/" method="post" target="_blank" name="sentoraform">' . /*
-		'<input type="hidden" name="inUsername" value="' . htmlentities($params["username"]) . '" />' .
-		'<input type="hidden" name="inPassword" value="' . htmlentities($params["password"]) . '" />' . 
-		$arr["csrf_token"] . //*/
-		'<input type="button" onClick="window.open(\'' . getAddress($params) . '/\')" value="Login to Control Panel" />
+	$code = '<form action="' . getAddress($params) . '/" method="post" target="_blank" name="sentoraform">
+		<input type="button" onClick="window.open(\'' . getAddress($params) . '/\')" value="Login to Control Panel" />
 		<input type="button" value="Login to Webmail" onClick="window.open(\'' . getAddress($params) . '/etc/apps/webmail/\')" />
 	</form>';
 
@@ -499,27 +565,29 @@ function sentora_UsageUpdate($params) {
 	// Server details
 
 	$response = sendSenitorRequest($params, "manage_clients", "GetAllClients", array()); // $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-	$xmws_values = $response->asArray();
-	$xmws_clients = $xmws_values['client'];
+	if(!empty($response)){
+		$xmws_values = $response->asArray();
+		$xmws_clients = $xmws_values['client'];
 
-	/*
-	 * NOTICE In the whmcs api doc disklimit is shown as dislimit in mysql it is really disklimit
-	 * also diskused is really diskusage
-	 * also bwused is really bwusage
-	 * 
-	 * not sure if these are changes from another whmcs version
-	 *  but i'm using the latest whmcs and thats what they are now
-	 * 
-	 * All values should be in MB
-	 */
-	foreach ($xmws_clients as $xmws_client) {
-		update_query("tblhosting", array(
-			"diskusage" => (int)convertToMBytes($xmws_client['diskspacereadable']),
-			"disklimit" => (int)convertToMBytes($xmws_client['diskspacequotareadable']),
-					"bwusage" => (int)convertToMBytes($xmws_client['bandwidthreadable']),
-					"bwlimit" => (int)convertToMBytes($xmws_client['bandwidthquotareadable']),
-					"lastupdate" => "now()",
-				), array("server" => $serverid, "username" => $xmws_client['username']));
+		/*
+		 * NOTICE In the whmcs api doc disklimit is shown as dislimit in mysql it is really disklimit
+		 * also diskused is really diskusage
+		 * also bwused is really bwusage
+		 * 
+		 * not sure if these are changes from another whmcs version
+		 *  but i'm using the latest whmcs and thats what they are now
+		 * 
+		 * All values should be in MB
+		 */
+		foreach ($xmws_clients as $xmws_client) {
+			update_query("tblhosting", array(
+				"diskusage" => (int)convertToMBytes($xmws_client['diskspacereadable']),
+				"disklimit" => (int)convertToMBytes($xmws_client['diskspacequotareadable']),
+						"bwusage" => (int)convertToMBytes($xmws_client['bandwidthreadable']),
+						"bwlimit" => (int)convertToMBytes($xmws_client['bandwidthquotareadable']),
+						"lastupdate" => "now()",
+					), array("server" => $serverid, "username" => $xmws_client['username']));
+		}
 	}
 }
 

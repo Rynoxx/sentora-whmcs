@@ -1,5 +1,10 @@
 # Changelog #
 
+## 2.3.3 ##
+- Allows the option to automatically create default DNS records upon account creation
+- Note added to the 'Reseller' option.
+- Misc small changes.
+
 ## 2.3.2 ##
 - Fixed [issue #2](https://github.com/Rynoxx/sentora-whmcs/issues/2)
 

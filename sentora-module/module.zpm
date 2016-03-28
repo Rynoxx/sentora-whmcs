@@ -48,25 +48,25 @@
 					<input type="hidden" name="inAdminSettings" value="inAdminSettings" />
 					<h2><: Settings :></h2>
 					<table class="zgrid">
-						<tr>
+						<tr style="margin-bottom: 4px;">
 							<th><: Setting :></th>
 							<th><: Value :></th>
 							<th><: Description :></th>
 						</tr>
-						<tr>
+						<tr style="margin-bottom: 4px;">
 							<td><: Send Email :></td>
 							<td><@ SendEmailForm @></td>
 							<td><: Should control panel send your admin users emails about important issues like version conflicts :></td>
 						</tr>
-						<tr>
+						<tr style="margin-bottom: 4px;">
 							<td><: Reseller can view API-key :></td>
 							<td><@ ResellerViewAPIForm @></td>
 							<td><: Allow resellers to view the API-key panel. This is useful for instances where the ZPanelX installation is intended to be used in conjunction with resellers on WHMCS. Warning! This can open up security holes as the API-key is the same for all modules on your ZPanelX installation. Use at your own risk! :></td>
 						</tr>
-						<tr>
+						<tr style="margin-bottom: 4px;">
 							<td><: WHMCS Login Link :></td>
 							<td><@ WHMCSLinkForm @></td>
-							<td><p><: The link to your WHMCS login/clientarea page :></p></td>
+							<td><p><: The link to your WHMCS login/clientarea page.<br>Must be preceeded by http:// or https:// :></p></td>
 						</tr>
 						<table class="none">
 						<tr>

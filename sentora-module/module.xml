@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 	<name>WHMCS</name>
-	<version>232</version>
+	<version>233</version>
 	<defaultcat>Server Admin</defaultcat>
 	<type>user</type>
 	<desc>WHMCS is a licensed billing system. This module allows you to connect WHMCS to the hosting control panel.</desc>

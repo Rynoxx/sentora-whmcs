@@ -38,12 +38,12 @@ class webservice extends ws_xmws {
 	* test reseller support
 	*/
 
-   /*
+   /**
 	* Looks for a UID matching the username provided
 	* @param string $username Username to lookup
 	* @return mixed string UID or empty Array() on failure
 	*/
-	function getUserId()
+	function GetUserId()
 	{
 		$request_data = $this->XMLDataToArray($this->wsdata);
 		$ctags = $request_data['xmws']['content'];
@@ -60,12 +60,12 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
-   /*
+   /**
 	* Checks if ZPanelX module version matches the module in WHMCS
 	* @param string $version WHMCS module version
 	* @return string "true" if versions match "false" otherwise
 	*/
-	function checkVersion($whmcs_version = null)
+	function CheckVersion($whmcs_version = null)
 	{
 		$version = module_controller::getVersion();
 
@@ -101,29 +101,10 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
-   /*
-	* Gets a CSRF token so that we can automaticly login from the WHMCS Client Area
-	* @return string A HTML form version of the CSRF token
-	*/
-	function getCSRFToken()
-	{
-		$dataobject = new runtime_dataobject();
-		$dataobject->addItemValue('response', '');
-		$request_data = $this->XMLDataToArray($this->wsdata);
-		$ctags = $request_data['xmws']['content'];
-
-		if($ctags["auto-login-enabled"]) {
-			$dataobject->addItemValue('content', ws_xmws::NewXMLTag('csrf_token', htmlentities(module_controller::getCSFR_Tag())));
-		} else {
-			$dataobject->addItemValue('content', ws_xmws::NewXMLTag('csrf_token', "false"));
-		}
-		return $dataobject->getDataObject();
-	}
-
    /****************
 	* Our version of manage_clients
 	****************/
-   /*
+   /**
 	* Checks if <username> exists in the database
 	* Returns "true" or "false"
 	* @return type
@@ -152,7 +133,7 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
-   /*
+   /**
 	* Checks if username is taken if not Creates a new client with data provided
 	* Accepts <resellerid> <username> <packageid> <groupid> <fullname> <email>
 	* Accepts <address> <postcode> <phone> <password> <sendemail> <emailsubject> <emailbody>
@@ -233,6 +214,34 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response_xml);
 		
+		return $dataobject->getDataObject();
+	}
+
+	/****************
+	 * Our version of dns_manager
+	 ****************/
+	public function CreateDefaultRecords(){
+		$request_data = $this->RawXMWSToArray($this->wsdata);
+
+		module_controller::createDefaultRecords(ws_generic::GetTagValue('uid', $request_data['content']), ws_generic::GetTagValue('domainid', $request_data['content']));
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('created', "true"));
+
+		return $dataobject->getDataObject();
+	}
+
+	public function GetDomainId()
+	{
+		$request_data = $this->RawXMWSToArray($this->wsdata);
+
+		$domainId = module_controller::getDomainId(ws_generic::GetTagValue('uid', $request_data['content']), ws_generic::GetTagValue('domain', $request_data['content']));
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('domainid', $domainId));
+
 		return $dataobject->getDataObject();
 	}
 }
