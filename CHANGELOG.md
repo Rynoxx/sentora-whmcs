@@ -1,5 +1,9 @@
 # Changelog #
 
+## 2.3.4 ##
+- Extending the error messages further for certain cases (no server configured for the product/order and no IP/Hostname assigned to a server)
+- Put some debug code behind "If Debug" statements
+
 ## 2.3.3 ##
 - Allows the option to automatically create default DNS records upon account creation
 - Note added to the 'Reseller' option.

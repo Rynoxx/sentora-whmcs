@@ -99,6 +99,10 @@
  * - Allows the option to automatically create default DNS records upon account creation
  * - Note added to the 'Reseller' option.
  * - Misc small changes.
+ *
+ * 2.3.4
+ * - Extending the error messages further for certain cases (no server configured for the product/order and no IP/Hostname assigned to a server)
+ * - Put some debug code behind "If Debug" statements
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -119,18 +123,19 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '233';
+	return '234';
 }
 
 function getProtocol($params) {
 	return ($params["serversecure"] ? "https://" : "http://");
 }
 
-function getAddress($params){
-	$protocol = getProtocol($params);
-	$url = empty($params['serverhostname']) ? $params['serverip'] : $params['serverhostname'];
+function getServerHostname($params){
+	return empty($params['serverhostname']) ? $params['serverip'] : $params['serverhostname'];
+}
 
-	return $protocol . $url;
+function getAddress($params){
+	return getProtocol($params) . getServerHostname($params);
 }
 
 function getUserID($params){
@@ -167,7 +172,27 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
 	$debug = false;
 
-	$resp = null;
+	if($debug){
+		$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
+	}
+	else{
+		$replacevars = array($server_apikey, $params["serveraccesshash"], $params["serverusername"], $params["serverpassword"], $params["password"], $params["clientsdetails"]["phonenumber"]);
+	}
+
+	if(empty($params["server"]) || empty(getServerHostname($params))){
+		$logOutput = $params["server"] ? (
+				"The server has no IP or hostname configured." . 
+				"\nServer ID:" . $params["serverid"] .
+				"\nServer Secure: " . $params["serversecure"] .
+				"\nServer Hostname: " . $params["serverhostname"] .
+				"\nServer IP: " . $paramas["serverip"] .
+				"\nProtocol: " . getProtocol($params) .
+				"\nAddress: " . getAddress($params)
+			) : "There's no server associated with this order.");
+
+		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $logOutput, "", $replacevars);
+		return null;
+	}
 
 	if($xmws == null){
 		$xmws = SenitorFactory::create(getAddress($params), $server_apikey, $params["serverusername"], $params["serverpassword"], array('verify' => false));
@@ -185,19 +210,18 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		return null;
 	}
 
-	#$replacevars = array($server_apikey, $params["serveraccesshash"], $params["serverusername"], $params["serverpassword"], $params["password"], $params["clientsdetails"]["phonenumber"]);
-	$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
-
 	$use_default_modules = $params["configoption3"] === "on" || $params["configoption3"] === "yes";
 
 	if($use_default_modules && !empty($default_modules[$module . "." . $endpoint])){
 		$module = $default_modules[$module . "." . $endpoint];
 	}
 
-	if($debug){
+	if($debug){ # Even more debugging, enables verbose output of the Senitor library
 		$xmws->debugMode();
 		ob_start();
 	}
+
+	$resp = null;
 
 	try{
 		$xmws->setModule($module);
@@ -267,6 +291,13 @@ function sendVersionToSentora($params) {
 }
 
 function sentora_CreateAccount($params) {
+	if(empty($params["server"])){
+		return "There's no server assigned to the order...";
+	}
+
+	if(empty(getServerHostname($params))){
+		return "There's no hostname or IP assigned to the server (ID: " . $params["serverid"] . ")";
+	}
 
 	// Create account, used by the automation system and manual button
 	// Account details
