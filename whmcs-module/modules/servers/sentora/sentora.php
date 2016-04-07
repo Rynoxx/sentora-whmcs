@@ -165,7 +165,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
-	$debug = true;
+	$debug = false;
 
 	$resp = null;
 
