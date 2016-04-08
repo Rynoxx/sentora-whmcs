@@ -37,6 +37,7 @@ The WHMCS and Sentora installation running on PHP 5.4 or above
 ```
 2. Configure which usergroups that should be allowed to access the WHMCS module on Sentora using the Module Admin tool `http://url.toyoursentora.tld/?module=moduleadmin`
 3. Configure the WHMCS module according to the form on the module page `http://url.toyoursentora.tld/?module=whmcs`
+4. Configure packages to your liking
 
 **If you're having trouble with terminating clients through WHMCS**
 * Edit line 21 of `sentora/modules/manage_clients/code/webservice` to be this:
@@ -64,7 +65,22 @@ Instead of this.
 
 	5. Tick the "Secure" box if you want WHMCS to connect to your server using HTTPS instead of HTTP
 
-### WHMCS Setup guide ###
+	6. Create a server group for you sentora servers, and add your created server(s) to it.
+
+4. In WHMCS admin panel, navigate to "Setup" -> "Products/Services" -> "Products/Services" and add a new product
+	1. Go to the 'Module Settings' tab, it's the only tab which within the scope of this guide.
+
+	2. Set 'Module Name' to 'Sentora'
+
+	3. Set the 'Server Group' to the one you created in step 3.6
+
+	4. Set 'Package Name' to the exact package name of the package you want as configured in Sentora
+
+	5. Leave 'Reseller' unticked if you're unsure.
+
+	6. Tick 'Auto-Create DNS Records' if you want the domains created through WHMCS to automatically have default DNS records (email, ftp, www, etc) created in Sentora, this is required if you want your clients to be able to use your nameservers without them manually creating the default records.
+
+### WHMCS Setup guide by conceptr980 ###
 **Written by [conceptr980](http://forums.sentora.org/member.php?action=profile&uid=1196 "Conceptr980s profile on the Sentora forum")**
 
 #### WHMCS - Servers ####
@@ -89,7 +105,7 @@ Instead of this.
 **- Details Tab: Fill the desired Info**  
 **- Modules Settings Tab**
 * **Module Name**: Sentora
-* **Server Group**: Whatever you created or leave it none
+* **Server Group**: A server group you've created for the Sentora server(s)
 * **Package Name**: The name of your package in the host panel
 * (Copy and past package name, Home --> Hosting Management --> Package Manager)
 * **Reseller**: Tick

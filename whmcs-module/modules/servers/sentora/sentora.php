@@ -10,7 +10,7 @@
  *
  * Original: THIS CAN BE IGNORED, UNLESS YOU WANT TO KNOW ABOUT THE PREVIOUS AUTHOR(S)
  *	zPanel WHMCS module 1.0.1
- *	Writted by Mathieu L�gar� (levelkro@yahoo.ca)
+ *	Writted by Mathieu Légaré (levelkro@yahoo.ca)
  *	Use the PHP XMWS API Client by ballen (ballen@zpanelcp.com)
  *	Fixed for version zPanel 10.0.1 CentOS Linux
  *	Tested with WHMCS 5.1.2 and Linux CentOS 6.3
@@ -151,7 +151,7 @@ function getUserID($params){
 	}
 }
 
-function getDomainID($userid, $domain){
+function getDomainID($params, $userid, $domain){
 	$response = sendSenitorRequest($params, "whmcs", "GetDomainId", array("uid" => $userid, "domain" => $domain));
 
 	if(!empty($response)){
@@ -170,7 +170,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
-	$debug = false;
+	$debug = true;
 
 	if($debug){
 		$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
@@ -188,7 +188,14 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 				"\nServer IP: " . $paramas["serverip"] .
 				"\nProtocol: " . getProtocol($params) .
 				"\nAddress: " . getAddress($params)
-			) : "There's no server associated with this order.");
+			) : "There's no server associated with this order." . (
+				"\nServer ID:" . $params["serverid"] .
+				"\nServer Secure: " . $params["serversecure"] .
+				"\nServer Hostname: " . $params["serverhostname"] .
+				"\nServer IP: " . $paramas["serverip"] .
+				"\nProtocol: " . getProtocol($params) .
+				"\nAddress: " . getAddress($params)
+			);
 
 		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $logOutput, "", $replacevars);
 		return null;
@@ -262,13 +269,13 @@ function sentora_ConfigOptions() {
 			"FriendlyName" => "Reseller",
 			"Type" => "yesno",
 			"Description" => "Yes, is a reseller. <br>This will give the people who buy this package reseller access to sentora. Leave this unticked if you're unsure.",
-			"default" => "no"
+			"default" => "off"
 		),
 		"autocreate_dns" => array(
 			"FriendlyName" => "Auto-Create DNS Records",
 			"Type" => "yesno",
-			"Description" => "Yes, automatically create default domain records.",
-			"default" => "yes"
+			"Description" => "Yes, automatically create default domain records. (This is required if you want your clients to be able to use your nameservers without them manually creating the default records)",
+			"default" => "on"
 		)
 	);
 
@@ -379,7 +386,7 @@ function sentora_CreateAccount($params) {
 		}
 
 		if($params["configoption3"] === "on"){
-			$domainid = getDomainID($uid, $params["domain"]);
+			$domainid = getDomainID($params, $uid, $params["domain"]);
 
 			if(empty($domainid)){
 				return "Account and domain created? Error getting domain id for DNS setup.";
@@ -412,12 +419,17 @@ function sentora_TerminateAccount($params) {
 	// Starting to Terminate the user to Sentora
 	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
 
-	$content = $response->asArray();
-	// If disabled return true, is done!
-	if ($content['deleted'] == "true") {
-		$result = "success";
-	} else {
-		$result = "User account is not deleted.";
+	if(empty($response)){
+		$result = "Sentora couldn't delete client.";
+	}
+	else{
+		$content = $response->asArray();
+		// If disabled return true, is done!
+		if ($content['deleted'] == "true") {
+			$result = "success";
+		} else {
+			$result = "User account is not deleted.";
+		}
 	}
 
 	return $result;
