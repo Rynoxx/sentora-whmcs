@@ -126,6 +126,84 @@ function getModuleVersion(){
 	return '234';
 }
 
+function sentora_ConfigOptions() {
+$custom_username_help = <<<'HTML'
+<div id='custom_username_help' class='modal fade' role='dialog'>
+	<div class="modal-dialog">
+		<!-- help content -->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Custom Username Generation Help</h4>
+			</div>
+			<div class="modal-body">
+				<p>
+					This field can be used to generate custom usernames replacing the default ones. You can use variables in a smarty-like way (<code>{$variablename}</code>) to insert variable values into the username.<br />
+					Example: <code>cp{$serviceid}</code> would result in the username <code>cp5</code> on a service with the ID 5, <code>cp{pad($serviceid, 4, '0')}</code> would result in <code>cp0005</code> if ran on a service with the ID 5.
+				</p>
+
+				<h5>Available functions:</h5>
+				<ul>
+					<li><code>pad(String $Input, int $Pad_Length, String $Padding)</code> - (NOT IMPLEMENTED YET, BUT IS PLANNED) Adds a padding to the left of the string, e.g. <code>pad($serviceid, 4, 0)</code> will result in <code>0004</code>, this uses <a href="http://php.net/manual/en/function.str-pad.php">str_pad</a> (although omitting the last argument to only use left padding) click the link for more info.</li>
+				</ul>
+
+				<br />
+
+				<h5>Available variables:</h5>
+				<ul>
+					<li><code>serviceid</code> - The unique ID of the service/order</li>
+					<li><code>userid</code> - The unique ID of the client that owns the service</li>
+					<li><code>serverid</code> - The server ID that the service is assigned to (zero if no server assigned)</li>
+					<li><code>serverip</code> - The IP Address of the sentora server</li>
+					<li><code>domain</code> - The domain assigned to the product/service (can be empty)</li>
+					<li><code>domain_short</code> - The domain assigned to the product/service, without dots and only the first eight (8) characters (can be empty)</li>
+					<li><code>firstname</code> - The firstname of the client</li>
+					<li><code>lastname</code> - The lastname of the client</li>
+					<li><code>fullname</code> - First Name + Last Name</li>
+					<li><code>companyname</code> - The company name associated with the client (can be empty)</li>
+					<li><code>email</code> - The email address associated with the client</li>
+					<li><code>country</code> - 2 Letter ISO Country Code</li>
+					<li><code>groupid</code> - Client Group ID</li>
+				</ul>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+HTML;
+
+	// Option for the product
+	$configarray = array(
+		"package_name" => array(
+			"FriendlyName" => "Package Name",
+			"Type" => "text",
+			"Size" => "25",
+			"Description" => "The name of the package in Sentora"
+		),
+		"reseller" => array(
+			"FriendlyName" => "Reseller",
+			"Type" => "yesno",
+			"Description" => "Yes, is a reseller (can be ignored if you've set the product type to reseller). <br>This will give the people who buy this package reseller access to sentora.<br>Leave this unticked if you're unsure.",
+			"Default" => "off"
+		),
+		"autocreate_dns" => array(
+			"FriendlyName" => "Auto-Create DNS Records",
+			"Type" => "yesno",
+			"Description" => "Yes, automatically create default domain records.<br>(This is required if you want your clients to be able to use your nameservers without them manually creating the default records)",
+			"Default" => "on"
+		),
+		"custom_username" => array(
+			"FriendlyName" => "Custom Username Generation",
+			"Type" => "text",
+			"Description" => "Leave empty to disable, click <a data-toggle='modal' data-target='#custom_username_help' href='#'>HERE</a> for more info." . $custom_username_help,
+		)
+	);
+
+	return $configarray;
+}
+
 function getProtocol($params) {
 	return ($params["serversecure"] ? "https://" : "http://");
 }
@@ -170,7 +248,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
-	$debug = true;
+	$debug = false;
 
 	if($debug){
 		$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
@@ -256,32 +334,6 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 	return $resp;
 }
 
-function sentora_ConfigOptions() {
-	// Option for the product
-	$configarray = array(
-		"package_name" => array(
-			"FriendlyName" => "Package Name",
-			"Type" => "text",
-			"Size" => "25",
-			"Description" => "The name of the package in Sentora"
-		),
-		"reseller" => array(
-			"FriendlyName" => "Reseller",
-			"Type" => "yesno",
-			"Description" => "Yes, is a reseller. <br>This will give the people who buy this package reseller access to sentora. Leave this unticked if you're unsure.",
-			"default" => "off"
-		),
-		"autocreate_dns" => array(
-			"FriendlyName" => "Auto-Create DNS Records",
-			"Type" => "yesno",
-			"Description" => "Yes, automatically create default domain records. (This is required if you want your clients to be able to use your nameservers without them manually creating the default records)",
-			"default" => "on"
-		)
-	);
-
-	return $configarray;
-}
-
 function sendVersionToSentora($params) {
 	$array_data = array("whmcs_version" => getModuleVersion());
 
@@ -350,14 +402,26 @@ function sentora_CreateAccount($params) {
 	#$response = sendSenitorRequest($params, "manage_clients", "CreateClient", $data);
 
 	// If it returns anything except 'success' then the user already exists
-	if($response == null){
+	if ($response == null) {
 		return "Account couldn't be created, the API Request failed.";
 	}
 
 	$stringResponse = $response->asString();
 
-	if (!empty($stringResponse) && $response->asString() != 'success') {
-		return $response->asString();
+	if (!empty($stringResponse) && ($stringResponse != 'success' || $stringResponse != 'true')) {
+		if ($response->asString() == "false") {
+			$usernameExists = sendSenitorRequest($params, "manage_clients", "UsernameExists", array("username" => $username));
+
+			if (!empty($usernameExists) && $usernameExists->asString() == "true") {
+				return "Account couldn't be created, an account with that username already exists.";
+			}
+			else{
+				return "Account couldn't be created.";
+			}
+		}
+		else{
+			return $response->asString();
+		}
 	}
 
 	$response = null;

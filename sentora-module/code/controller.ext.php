@@ -302,27 +302,6 @@ class module_controller
 		return false;
 	}
 
-	/**********
-	 * Our version of password_assistant
-	 * no changes
-	 **********/
-
-	static function UpdatePassword($uid, $password)
-	{
-		global $zdbh;
-		$crypto = new runtime_hash;
-		$crypto->SetPassword($password);
-		$randomsalt = $crypto->RandomSalt();
-		$crypto->SetSalt($randomsalt);
-		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
-		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_pass_vc=:secure_password, ac_passsalt_vc= :randomsalt WHERE ac_id_pk=:userid AND ac_deleted_ts is NULL");
-		$sql->bindParam(':randomsalt', $randomsalt);
-		$sql->bindParam(':secure_password', $secure_password);
-		$sql->bindParam(':userid', $uid);
-		$sql->execute();
-		return true;
-	}
-
    /**********
 	* Our version of manage_clients
 	* Changes:
@@ -333,166 +312,7 @@ class module_controller
 	* ExecuteUpdateClient - dropped self::Enable/Disable client and just added the hooks to top/bottom
 	**********/
 
-   /**
-	* Checks if a username exists in the database
-	* @return bool true if username exists false if available
-	*/
-	static function getUserExists($username)
-	{
-		global $zdbh;
-		$username = is_array($username) ? implode($username) : $username;
-		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM x_accounts WHERE ac_user_vc=:uname AND ac_deleted_ts is NULL");
-		$stmt->bindValue(":uname", $username);
-		$stmt->execute();
-		$res = $stmt->fetch(PDO::FETCH_ASSOC);
-		if ($res['COUNT(*)'] > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	static function ExecuteCreateClient($uid, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password, $sendemail, $emailsubject, $emailbody)
-	{
-		global $zdbh;
-
-		// Check for spaces and remove if found...
-		$username = is_array($username) ? implode($username) : $username;
-		$username = strtolower(str_replace(' ', '', $username));
-		$reseller = ctrl_users::GetUserDetail($uid);
-
-		if(!is_numeric($packageid)) $packageid=self::getPackageIdFix($packageid);
-
-		// Check for errors before we continue...
-		if (fs_director::CheckForEmptyValue(self::CheckCreateForErrors($username, $packageid, $groupid, $email, $password))) {
-			$errormsg = " ";
-
-		if(self::$alreadyexists) {
-			$errormsg .= sprintf(ui_language::translate("That username is already taken (\"%s\"). "), (string)$username);
-		}
-
-		if(self::$badname) {
-			$errormsg .= sprintf(ui_language::translate("That username is invalid (\"%s\"). "), (string)$username);
-		}
-
-		if(self::$badpassword) {
-			$errormsg .= sprintf(ui_language::translate("That password doesn't meet the requirements (\"%s\"). "), (string)$password);
-		}
-
-		if(self::$userblank) {
-			$errormsg .= sprintf(ui_language::translate("The username is empty (\"%s\"). "), (string)$username);
-		}
-
-		if(self::$emailblank) {
-			$errormsg .= sprintf(ui_language::translate("The email is empty (\"%s\"). "), (string)$email);
-		}
-
-		if(self::$passwordblank) {
-			$errormsg .= sprintf(ui_language::translate("The password is empty (\"%s\"). "), (string)$password);
-		}
-
-		if(self::$packageblank) {
-			$errormsg .= sprintf(ui_language::translate("The package is empty (\"%s\"). "), (string)$packageid);
-		}
-
-		if(self::$groupblank) {
-			$errormsg .= sprintf(ui_language::translate("The group is empty (\"%s\"). "), (string)$groupid);
-		}
-			return ui_language::translate("Failed the check for valid parameters. ") . $errormsg;
-		}
-		
-		runtime_hook::Execute('OnBeforeCreateClient');
-
-		$crypto = new runtime_hash;
-		$crypto->SetPassword($password);
-		$randomsalt = $crypto->RandomSalt();
-		$crypto->SetSalt($randomsalt);
-		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
-		$time = time();
-		
-		// No errors found, so we can add the user to the database...
-		$sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts) VALUES (:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :uid, :time)");
-		$sql->bindParam(':uid', $uid);
-		$sql->bindParam(':time', $time);
-		$sql->bindParam(':username', $username);
-		$sql->bindParam(':password', $secure_password);
-		$sql->bindParam(':passsalt', $randomsalt);
-		$sql->bindParam(':email', $email);
-		$sql->bindParam(':packageid', $packageid);
-		$sql->bindParam(':groupid', $groupid);
-		$sql->bindParam(':resellertheme', $reseller['usertheme']);
-		$sql->bindParam(':resellercss', $reseller['usercss']);
-		$sql->execute();
-
-		// Now lets pull back the client ID so that we can add their personal address details etc...
-		$numrows = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_reseller_fk=:uid ORDER BY ac_id_pk DESC");
-		$numrows->bindParam(':uid', $uid);
-		$numrows->execute();
-
-		$client = $numrows->fetch();
-
-		$address = is_array($address) ? implode($address) : $address;
-		$post = is_array($post) ? implode($post) : $post;
-		$phone = is_array($phone) ? implode($phone) : $phone;
-		$time = time();
-
-		$sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:userid, :fullname, :packageid, :groupid, :address, :postcode, :phone, :time)");
-		$sql->bindParam(':userid', $client['ac_id_pk']);
-		$sql->bindParam(':fullname', $fullname);
-		$sql->bindParam(':packageid', $packageid);
-		$sql->bindParam(':groupid', $groupid);
-		$sql->bindParam(':address', $address);
-		$sql->bindParam(':postcode', $post);
-		$sql->bindParam(':phone', $phone);
-		$sql->bindParam(':time', $time);
-		$sql->execute();
-
-		// Now we add an entry into the bandwidth table, for the user for the upcoming month.
-		$sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (:ac_id_pk, :date, 0, 0)");
-		$date = date("Ym", time());
-		$sql->bindParam(':date', $date);
-		$sql->bindParam(':ac_id_pk', $client['ac_id_pk']);
-		$sql->execute();
-
-		// Lets create the client diectories
-		fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username);
-		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username, 0777);
-		fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html");
-		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html", 0777);
-		fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups");
-		fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups", 0777);
-
-		// Send the user account details via. email (if requested)...
-		if ($sendemail <> 0) {
-			if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-				$protocol = 'https://';
-			} else {
-				$protocol = 'http://';
-			}
-
-			$zpdomain = ctrl_options::GetSystemOption('zpanel_domain');
-			$domain = empty($zpdomain) ? ctrl_options::GetSystemOption('sentora_domain') : ctrl_options::GetSystemOption('zpanel_domain');
-
-			$emailsubject = str_replace("{{username}}", $username, $emailsubject);
-			$emailsubject = str_replace("{{password}}", $password, $emailsubject);
-			$emailsubject = str_replace("{{fullname}}", $fullname, $emailsubject);
-			$emailbody = str_replace("{{username}}", $username, $emailbody);
-			$emailbody = str_replace("{{password}}", $password, $emailbody);
-			$emailbody = str_replace("{{fullname}}", $fullname, $emailbody);
-			$emailbody = str_replace('{{controlpanelurl}}', $protocol . $domain, $emailbody);
-
-			$phpmailer = new sys_email();
-			$phpmailer->Subject = $emailsubject;
-			$phpmailer->Body = $emailbody;
-			$phpmailer->AddAddress($email);
-			$phpmailer->SendEmail();
-		}
-		runtime_hook::Execute('OnAfterCreateClient');
-		self::$resetform = true;
-		self::$ok = true;
-		return true;
-	}
-
+	
 	static function ExecuteUpdateClient($clientid, $package, $enabled, $group, $fullname, $email, $address, $post, $phone, $newpass)
 	{
 		global $zdbh;
@@ -521,13 +341,13 @@ class module_controller
 		$crypto->SetSalt($randomsalt);
 		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
 
-		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_pass_vc= :newpass, ac_passsalt_vc= :passsalt WHERE ac_id_pk= :clientid");
+		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_pass_vc=:newpass, ac_passsalt_vc=:passsalt WHERE ac_id_pk=:clientid");
 		$sql->bindParam(':clientid', $clientid);
 		$sql->bindParam(':newpass', $secure_password);
 		$sql->bindParam(':passsalt', $randomsalt);
 		$sql->execute();
 		}
-		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_email_vc= :email, ac_package_fk= :package, ac_enabled_in= :isenabled, ac_group_fk= :group WHERE ac_id_pk = :clientid");
+		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_email_vc=:email, ac_package_fk=:package, ac_enabled_in=:isenabled, ac_group_fk=:group WHERE ac_id_pk =:clientid");
 		$sql->bindParam(':email', $email);
 		$sql->bindParam(':package', $package);
 		$sql->bindParam(':isenabled', $enabled);
@@ -535,7 +355,7 @@ class module_controller
 		$sql->bindParam(':clientid', $clientid);
 		$sql->execute();
 
-		$sql = $zdbh->prepare("UPDATE x_profiles SET ud_fullname_vc= :fullname, ud_group_fk= :group, ud_package_fk= :package, ud_address_tx= :address,ud_postcode_vc= :postcode, ud_phone_vc= :phone WHERE ud_user_fk=:accountid");
+		$sql = $zdbh->prepare("UPDATE x_profiles SET ud_fullname_vc=:fullname, ud_group_fk=:group, ud_package_fk=:package, ud_address_tx=:address,ud_postcode_vc=:postcode, ud_phone_vc=:phone WHERE ud_user_fk=:accountid");
 		$sql->bindParam(':fullname', $fullname);
 		$sql->bindParam(':group', $group);
 		$sql->bindParam(':package', $package);
@@ -553,89 +373,6 @@ class module_controller
 		}
 		runtime_hook::Execute('OnAfterUpdateClient');
 		self::$ok = true;
-		return true;
-	}
-
-	static function CheckCreateForErrors($username, $packageid, $groupid, $email, $password = "")
-	{
-		global $zdbh;
-		$username = is_array($username) ? implode($username) : $username;
-		$username = strtolower(str_replace(' ', '', $username));
-
-		// Check to make sure the username is not blank or exists before we go any further...
-		if (!fs_director::CheckForEmptyValue($username)) {
-			$sql = "SELECT COUNT(*) FROM x_accounts WHERE UPPER(ac_user_vc)=:user AND ac_deleted_ts IS NULL";
-			$numrows = $zdbh->prepare($sql);
-			$user = strtoupper($username);
-			$numrows->bindParam(':user', $user);
-			if ($numrows->execute()) {
-				if ($numrows->fetchColumn() <> 0) {
-					self::$alreadyexists = true;
-					return false;
-				}
-			}
-			if (!self::IsValidUserName($username)) {
-				self::$badname = true;
-				return false;
-			}
-		} else {
-			self::$userblank = true;
-			return false;
-		}
-
-		// Check to make sure the packagename is not blank and exists before we go any further...
-		if (!fs_director::CheckForEmptyValue($packageid)) {
-			$sql = "SELECT COUNT(*) FROM x_packages WHERE pk_id_pk=:packageid AND pk_deleted_ts IS NULL";
-			$numrows = $zdbh->prepare($sql);
-			$numrows->bindParam(':packageid', $packageid);
-			if ($numrows->execute()) {
-				if ($numrows->fetchColumn() == 0) {
-					self::$packageblank = true;
-					return false;
-				}
-			}
-		} else {
-			self::$packageblank = true;
-			return false;
-		}
-
-		// Check to make sure the groupname is not blank and exists before we go any further...
-		if (!fs_director::CheckForEmptyValue($groupid)) {
-			$sql = "SELECT COUNT(*) FROM x_groups WHERE ug_id_pk=:groupid";
-			$numrows = $zdbh->prepare($sql);
-			$numrows->bindParam(':groupid', $groupid);
-			if ($numrows->execute()) {
-				if ($numrows->fetchColumn() == 0) {
-					self::$groupblank = true;
-					return;
-				}
-			}
-		} else {
-			self::$groupblank = true;
-			return false;
-		}
-
-		// Check for invalid characters in the email and that it exists...
-		if (!fs_director::CheckForEmptyValue($email)) {
-			if (!self::IsValidEmail($email)) {
-				self::$bademail = true;
-				return false;
-			}
-		} else {
-			self::$emailblank = true;
-			return false;
-		}
-
-		// Check for password length...
-		if (!fs_director::CheckForEmptyValue($password)) {
-			if (strlen($password) < ctrl_options::GetSystemOption('password_minlength')) {
-				self::$badpassword = true;
-				return false;
-			}
-		} else {
-			self::$passwordblank = true;
-			return false;
-		}
 		return true;
 	}
 
@@ -666,11 +403,11 @@ class module_controller
 		global $zdbh;
 		$name = is_array($name) ? implode($name) : $name;
 
-		$stmt = $zdbh->prepare("SELECT COUNT(*) FROM `x_packages` WHERE `pk_name_vc`=:name AND pk_deleted_ts IS NULL");
+		$stmt = $zdbh->prepare("SELECT COUNT(*) as `count` FROM `x_packages` WHERE `pk_name_vc`=:name AND pk_deleted_ts IS NULL");
 		$stmt->bindValue(":name", $name);
 		$stmt->execute();
 		$rows = $stmt->fetch(PDO::FETCH_ASSOC);
-		$numrows = $rows['COUNT(*)'];
+		$numrows = $rows['count'];
 		
 		if ($numrows == 0) {
 			return false;
