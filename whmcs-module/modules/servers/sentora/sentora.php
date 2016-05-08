@@ -484,15 +484,15 @@ function sentora_TerminateAccount($params) {
 	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
 
 	if(empty($response)){
-		$result = "Sentora couldn't delete client.";
+		$result = "Failed to delete the client.";
 	}
 	else{
 		$content = $response->asArray();
-		// If disabled return true, is done!
+		// If deleted return true, is done!
 		if ($content['deleted'] == "true") {
 			$result = "success";
 		} else {
-			$result = "User account is not deleted.";
+			$result = "Failed to delete the client.";
 		}
 	}
 
