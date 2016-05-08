@@ -106,6 +106,7 @@
  *
  * 2.3.5
  * - Added the ability to customize the generated username
+ * - Further migration towards using default sentora modules for API calls
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -126,7 +127,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '234';
+	return '235';
 }
 
 function sentora_ConfigOptions() {

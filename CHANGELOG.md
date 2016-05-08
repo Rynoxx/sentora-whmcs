@@ -1,5 +1,9 @@
 # Changelog #
 
+## 2.3.5 ##
+- Added the ability to customize the generated username
+- Further migration towards using default sentora modules for API calls
+
 ## 2.3.4 ##
 - Extending the error messages further for certain cases (no server configured for the product/order and no IP/Hostname assigned to a server)
 - Put some debug code behind "If Debug" statements
