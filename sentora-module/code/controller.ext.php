@@ -412,7 +412,7 @@ class module_controller
 		if ($numrows == 0) {
 			return false;
 		} else {
-			$stmt = $zdbh->prepare("SELECT * FROM `x_packages` WHERE `pk_name_vc`=:name AND pk_deleted_ts IS NULL");
+			$stmt = $zdbh->prepare("SELECT * FROM `x_packages` WHERE LOWER(`pk_name_vc`)=LOWER(:name) AND pk_deleted_ts IS NULL");
 			$stmt->bindValue(":name", $name);
 			$stmt->execute();
 			$rowpack = $stmt->fetch(PDO::FETCH_ASSOC);

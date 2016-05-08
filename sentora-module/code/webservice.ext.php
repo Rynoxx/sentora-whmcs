@@ -60,6 +60,22 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
+	function GetPackageId(){
+		$request_data = $this->XMLDataToArray($this->wsdata);
+		$ctags = $request_data['xmws']['content'];
+
+		if(!empty($ctags["whmcs_version"]))	{
+			$this->checkVersion($ctags["whmcs_version"]);
+		}
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$pid = module_controller::getPackageIdFix($ctags['packagename']);
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('packageid', $pid));
+		
+		return $dataobject->getDataObject();
+	}
+
    /**
 	* Checks if ZPanelX module version matches the module in WHMCS
 	* @param string $version WHMCS module version

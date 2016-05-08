@@ -160,7 +160,7 @@ class Response extends AbstractMessage implements ResponseInterface
         try {
             // Allow XML to be retrieved even if there is no response body
             $xml = new \SimpleXMLElement(
-                (string) $this->getBody() ?: '<root />',
+                (string) trim($this->getBody()) ?: '<root />', # Added trim to fix some failures when attempting to convert to XML
                 isset($config['libxml_options']) ? $config['libxml_options'] : LIBXML_NONET,
                 false,
                 isset($config['ns']) ? $config['ns'] : '',

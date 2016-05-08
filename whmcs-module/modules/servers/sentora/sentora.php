@@ -103,6 +103,9 @@
  * 2.3.4
  * - Extending the error messages further for certain cases (no server configured for the product/order and no IP/Hostname assigned to a server)
  * - Put some debug code behind "If Debug" statements
+ *
+ * 2.3.5
+ * - Added the ability to customize the generated username
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
@@ -139,12 +142,16 @@ $custom_username_help = <<<'HTML'
 			<div class="modal-body">
 				<p>
 					This field can be used to generate custom usernames replacing the default ones. You can use variables in a smarty-like way (<code>{$variablename}</code>) to insert variable values into the username.<br />
-					Example: <code>cp{$serviceid}</code> would result in the username <code>cp5</code> on a service with the ID 5, <code>cp{pad($serviceid, 4, '0')}</code> would result in <code>cp0005</code> if ran on a service with the ID 5.
+					Example: <code>cp{$userid}</code> would result in the username <code>cp5</code> on a user with the ID 5, <code>cp{pad($userid, 4, '0')}</code> would result in <code>cp0005</code> if ran on a user with the ID 5.
+				</p>
+
+				<p class="alert alert-danger">
+					Do note that Sentora has some limitations when it comes to what can and can't be in a username. The only allowed characters are: a-z (both lower and upper case), - and 0-9, the username can't end in a dash ( - ), and it can't be longer than 62 characters.
 				</p>
 
 				<h5>Available functions:</h5>
 				<ul>
-					<li><code>pad(String $Input, int $Pad_Length, String $Padding)</code> - (NOT IMPLEMENTED YET, BUT IS PLANNED) Adds a padding to the left of the string, e.g. <code>pad($serviceid, 4, 0)</code> will result in <code>0004</code>, this uses <a href="http://php.net/manual/en/function.str-pad.php">str_pad</a> (although omitting the last argument to only use left padding) click the link for more info.</li>
+					<li><code>pad(String $Input, int $Pad_Length, String $Padding)</code> - Adds a padding to the left of the string, e.g. <code>pad($userid, 4, 0)</code> will result in <code>0005</code>, this uses <a href="http://php.net/manual/en/function.str-pad.php">str_pad</a> (although omitting the last argument to only use left padding) click the link for more info.</li>
 				</ul>
 
 				<br />
@@ -322,14 +329,14 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 			$str_error .= PHP_EOL . "Debug string from Senitor: " . ob_get_clean();
 		}
 
-		$str_error .= PHP_EOL . " " . print_r(expression);
+		#$str_error .= PHP_EOL . " " . print_r(expression); # No clue what I was planning to do here...
 
-		logModuleCall("Sentora", $module . "." . $endpoint, $array_data, $str_error, "", $replacevars);
+		logModuleCall("Sentora", $module . "." . $endpoint, var_export($array_data, true), $str_error, "", $replacevars);
 
 		return null;
 	}
 
-	logModuleCall("Sentora", $module . "." . $endpoint, $array_data, print_r($resp->asArray(), true), "", $replacevars);
+	logModuleCall("Sentora", $module . "." . $endpoint, var_export($array_data, true), var_export($resp->asArray(), true) . ($debug ? "\nDebug from senitor: " . ob_get_clean() : ""), "", $replacevars);
 
 	return $resp;
 }
@@ -379,27 +386,41 @@ function sentora_CreateAccount($params) {
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
 
+	$packageResponse = sendSenitorRequest($params, "whmcs", "GetPackageId", array( "packagename" => $params["configoption1"] ));
+
+	if($packageResponse == null){
+		return "Account couldn't be created, invalid package " . $params["configoption1"];
+	}
+
+	$pkgRespArray = $packageResponse->asArray();
+
+	$packageid = $pkgRespArray["packageid"];
+
+	if(empty($packageid)){
+		return "Account couldn't be created, invalid package " . $params["configoption1"];
+	}
+
 	//CreateClient Checks if that username exists and creates it, otherwise returns a failure
 	$data = array(
 		"resellerid" => $server_reseller,
-		"packageid" => $params["configoption1"],
-		"groupid" => $groupid,
 		"username" => $username,
+		"packageid" => $packageid,
+		"groupid" => $groupid,
 		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'],
 		"email" => $clientsdetails["email"],
 		"address" => $clientsdetails["address1"],
 		"postcode" => $clientsdetails["postcode"],
-		"password" => $password,
 		"phone" => $clientsdetails["phonenumber"],
-		"sendmail" => "0",
-		"emailsubject" => "0",
-		"emailbody" => "0"
+		"password" => $password,
+		"sendemail" => false,
+		"emailsubject" => "",
+		"emailbody" => ""
 	);
 
 	$response = null;
 
-	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
-	#$response = sendSenitorRequest($params, "manage_clients", "CreateClient", $data);
+	#$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
+	$response = sendSenitorRequest($params, "manage_clients", "CreateClient", $data);
 
 	// If it returns anything except 'success' then the user already exists
 	if ($response == null) {
@@ -408,7 +429,7 @@ function sentora_CreateAccount($params) {
 
 	$stringResponse = $response->asString();
 
-	if (!empty($stringResponse) && ($stringResponse != 'success' || $stringResponse != 'true')) {
+	if (!empty($stringResponse) && ($stringResponse != 'success' && $stringResponse != 'true')) {
 		if ($response->asString() == "false") {
 			$usernameExists = sendSenitorRequest($params, "manage_clients", "UsernameExists", array("username" => $username));
 
@@ -416,7 +437,7 @@ function sentora_CreateAccount($params) {
 				return "Account couldn't be created, an account with that username already exists.";
 			}
 			else{
-				return "Account couldn't be created.";
+				return "Account couldn't be created. Could be one of the following issues: Invalid username, invalid package, invalid or duplicate email, invalid password.";
 			}
 		}
 		else{
