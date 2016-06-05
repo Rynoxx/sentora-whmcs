@@ -127,7 +127,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '235';
+	return '236';
 }
 
 function sentora_ConfigOptions() {
@@ -383,6 +383,18 @@ function sentora_CreateAccount($params) {
 		return "No username is defined for '" . $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] . "'.";
 	}
 
+	$uniqueEmailResponse = sendSenitorRequest($params, "whmcs", "CheckUserEmailIsUnique", array( "email" => $clientsdetails["email"] ));
+
+	if($uniqueEmailResponse == null){
+		return "Account couldn't be created, couldn't verify that email '" . $clientsdetails["email"] . "' is unique";
+	}
+
+	$uniqueEmailRespStr = $uniqueEmailResponse->asString();
+
+	if($uniqueEmailRespStr != "true"){
+		return "Account couldn't be created, a user with the email '" . $clientsdetails["email"] . "' already exists! (NOTE: This includes deleted users)";
+	}
+
 	// Server details
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
@@ -431,14 +443,14 @@ function sentora_CreateAccount($params) {
 	$stringResponse = $response->asString();
 
 	if (!empty($stringResponse) && ($stringResponse != 'success' && $stringResponse != 'true')) {
-		if ($response->asString() == "false") {
+		if ($stringResponse == "false" || empty($stringResponse) || empty($response->asArray())) {
 			$usernameExists = sendSenitorRequest($params, "manage_clients", "UsernameExists", array("username" => $username));
 
 			if (!empty($usernameExists) && $usernameExists->asString() == "true") {
 				return "Account couldn't be created, an account with that username already exists.";
 			}
 			else{
-				return "Account couldn't be created. Could be one of the following issues: Invalid username, invalid package, invalid or duplicate email, invalid password.";
+				return "Account couldn't be created. Could be one of the following issues: Invalid username, invalid package, invalid email, invalid password.";
 			}
 		}
 		else{

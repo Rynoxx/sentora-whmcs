@@ -155,6 +155,23 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
+	public function CheckUserEmailIsUnique(){
+		$request_data = $this->XMLDataToArray($this->wsdata);
+		$ctags = $request_data['xmws']['content'];
+
+		if(!empty($ctags["whmcs_version"]))	{
+			$this->checkVersion($ctags["whmcs_version"]);
+		}
+		
+		$response_xml = ctrl_users::CheckUserEmailIsUnique($ctags['email']) ? "true" : "false";
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', $response_xml);
+		
+		return $dataobject->getDataObject();
+	}
+
 	/****************
 	 * Our version of dns_manager
 	 ****************/
