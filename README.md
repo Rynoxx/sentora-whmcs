@@ -22,7 +22,8 @@ ZPanel Module: [Knivey](https://github.com/knivey/)
 
 ## Requirements ##
 [WHMCS](http://whmcs.com/ "WHMCS Website") installed (doesn't have to be on the same machine as the sentora installation(s))
-The WHMCS and Sentora installation running on PHP 5.4 or above
+The WHMCS and Sentora installation running on PHP 5.4 or above  
+The Sentora module requires the following default modules to function (enabled by default): manage_clients and domains
 
 - - -
 

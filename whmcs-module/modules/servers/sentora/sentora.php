@@ -107,6 +107,9 @@
  * 2.3.5
  * - Added the ability to customize the generated username
  * - Further migration towards using default sentora modules for API calls
+ *
+ * 2.3.6
+ * - Improved error messages
  */
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)

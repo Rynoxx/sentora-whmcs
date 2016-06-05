@@ -1,5 +1,8 @@
 # Changelog #
 
+## 2.3.6 ##
+- Improved error messages
+
 ## 2.3.5 ##
 - Added the ability to customize the generated username
 - Further migration towards using default sentora modules for API calls
