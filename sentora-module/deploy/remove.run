@@ -32,6 +32,7 @@ function RemoveSystemOption($name)
 RemoveSystemOption('whmcs_reported');
 RemoveSystemOption('whmcs_sendemail_bo');
 RemoveSystemOption('whmcs_link');
+RemoveSystemOption('whmcs_admin');
 RemoveSystemOption('whmcs_reseller_view_api');
 
 ?>

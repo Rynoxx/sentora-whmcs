@@ -110,7 +110,18 @@
  *
  * 2.3.6
  * - Improved error messages
+ *
+ * 2.3.7
+ * - Reverted back to custom api functions for user creation
+ * - Added the ability to set custom admin dir in Sentora
+ * - Enabled the ability to disable single domain rather than the whole account.
+ * - Added a basic email template for WHMCS
  */
+
+/*
+Replace: sendSenitorRequest($params, "whmcs_unstable"
+With: sendSenitorRequest($params, "whmcs"
+*/
 
 // Attempted:	* - Enable auto-login from the WHMCS client area (Will add configuration options for this)
 //					Currently the CSRF Token is invalid, even if gotten from the server through API.
@@ -130,7 +141,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '236';
+	return '237';
 }
 
 function sentora_ConfigOptions() {
@@ -208,7 +219,13 @@ HTML;
 		"custom_username" => array(
 			"FriendlyName" => "Custom Username Generation",
 			"Type" => "text",
-			"Description" => "Leave empty to disable, click <a data-toggle='modal' data-target='#custom_username_help' href='#'>HERE</a> for more info." . $custom_username_help,
+			"Description" => "Leave empty to disable, click <a data-toggle='modal' data-target='#custom_username_help' href='#'>HERE</a> for more info." . $custom_username_help
+		),
+		"disable_domain" => array(
+			"FriendlyName" => "Disable domain",
+			"Type" => "yesno",
+			"Default" => "off",
+			"Description" => "When suspending, disable the domain rather than the account (will allow the Sentora default 'Domain Disabled' page to show)"
 		)
 	);
 
@@ -253,13 +270,12 @@ function getDomainID($params, $userid, $domain){
 	}
 }
 
-function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
+function sendSenitorRequest($params, $module, $endpoint, $array_data = array(), $debug = true){
 	global $xmws;
 	global $default_modules;
 
 	$serveraccesshash = explode(",", $params["serveraccesshash"]);
 	$server_apikey = $serveraccesshash[1]; # Get the API Key
-	$debug = false;
 
 	if($debug){
 		$replacevars = array(); # The array should ONLY be empty when debugging very thoroughly.
@@ -268,7 +284,9 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array()){
 		$replacevars = array($server_apikey, $params["serveraccesshash"], $params["serverusername"], $params["serverpassword"], $params["password"], $params["clientsdetails"]["phonenumber"]);
 	}
 
-	if(empty($params["server"]) || empty(getServerHostname($params))){
+	$serverHostname = getServerHostname($params);
+
+	if(empty($params["server"]) || empty($serverHostname)){
 		$logOutput = $params["server"] ? (
 				"The server has no IP or hostname configured." . 
 				"\nServer ID:" . $params["serverid"] .
@@ -365,7 +383,9 @@ function sentora_CreateAccount($params) {
 		return "There's no server assigned to the order...";
 	}
 
-	if(empty(getServerHostname($params))){
+	$serverHostname = getServerHostname($params);
+
+	if(empty($serverHostname)){
 		return "There's no hostname or IP assigned to the server (ID: " . $params["serverid"] . ")";
 	}
 
@@ -395,7 +415,7 @@ function sentora_CreateAccount($params) {
 	$uniqueEmailRespStr = $uniqueEmailResponse->asString();
 
 	if($uniqueEmailRespStr != "true"){
-		return "Account couldn't be created, a user with the email '" . $clientsdetails["email"] . "' already exists! (NOTE: This includes deleted users)";
+		return "Account couldn't be created, a user with the email '" . $clientsdetails["email"] . "' already exists! (NOTE: This includes deleted users, please use the 'Deleted Records Manager' module to remove such users)";
 	}
 
 	// Server details
@@ -436,7 +456,7 @@ function sentora_CreateAccount($params) {
 	$response = null;
 
 	#$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
-	$response = sendSenitorRequest($params, "manage_clients", "CreateClient", $data);
+	$response = sendSenitorRequest($params, "whmcs", "CreateClient", $data);
 
 	// If it returns anything except 'success' then the user already exists
 	if ($response == null) {
@@ -518,7 +538,13 @@ function sentora_TerminateAccount($params) {
 	$server_reseller = $serveraccesshash[0];  # Get the Reseller ID
 
 	// Starting to Terminate the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
+
+	/*
+		Moved DeleteClient to our own until error with the manage_clients DeleteClient is added to Sentora
+	*/
+
+	//$response = sendSenitorRequest($params, "manage_clients", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
+	$response = sendSenitorRequest($params, "whmcs", "DeleteClient", array("uid" => $uid, "moveid" => $server_reseller));
 
 	if(empty($response)){
 		$result = "Failed to delete the client.";
@@ -537,6 +563,7 @@ function sentora_TerminateAccount($params) {
 }
 
 function sentora_SuspendAccount($params) {
+	$content = array();
 	//Get the UID
 	$uid = getUserID($params);
 
@@ -544,24 +571,41 @@ function sentora_SuspendAccount($params) {
 		return "Error getting the UID";
 	}
 
-	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "DisableClient", array("uid" => $uid));
+	$type = "account";
 
-	$content = $response->asArray();
+	if($params["configoption5"] === "on"){
+		$domainid = getDomainID($params, $uid, $params["domain"]);
+		$type = "domain";
+
+		if(empty($domainid)){
+			return "Error getting the Domain ID";
+		}
+
+		$response = sendSenitorRequest($params, "whmcs", "UpdateDomainStatus", array("uid" => $uid, "domainid" => $domainid, "enable" => 0));
+
+		$content = $response->asArray();
+	}
+	else{
+		#UpdateDomainStatus
+
+		// Starting to Suspend the user to Sentora
+		$response = sendSenitorRequest($params, "manage_clients", "DisableClient", array("uid" => $uid));
+
+		$content = $response->asArray();
+	}
 
 	// If disabled return true, is done!
 	if ($content['disabled'] == "true") {
 		$result = "success";
 	} else {
-		$result = "User account is not suspended.";
+		$result = "User " . $type . " is not suspended.";
 	}
 
 	return $result;
 }
 
 function sentora_UnsuspendAccount($params) {
-	// sendVersionToSentora($params);
-
+	$content = array();
 	//Get the UID
 	$uid = getUserID($params);
 
@@ -569,16 +613,34 @@ function sentora_UnsuspendAccount($params) {
 		return "Error getting the UID";
 	}
 
-	// Starting to Suspend the user to Sentora
-	$response = sendSenitorRequest($params, "manage_clients", "EnableClient", array("uid" => $uid));
+	$type = "account";
 
-	$content = $response->asArray();
+	if($params["configoption5"] === "on"){
+		$domainid = getDomainID($params, $uid, $params["domain"]);
+		$type = "domain";
+
+		if(empty($domainid)){
+			return "Error getting the Domain ID";
+		}
+
+		$response = sendSenitorRequest($params, "whmcs", "UpdateDomainStatus", array("uid" => $uid, "domainid" => $domainid, "enable" => 1));
+
+		$content = $response->asArray();
+	}
+	else{
+		#UpdateDomainStatus
+
+		// Starting to Suspend the user to Sentora
+		$response = sendSenitorRequest($params, "manage_clients", "EnableClient", array("uid" => $uid));
+
+		$content = $response->asArray();
+	}
 
 	// If enabled return true, is done!
-	if ($content['enabled'] == "true") {
+	if ($content['enabled'] == "true" || $content['disabled'] == "false") {
 		$result = "success";
 	} else {
-		$result = "User account is not unsuspended.";
+		$result = "User " . $type . " is not unsuspended.";
 	}
 
 	return $result;

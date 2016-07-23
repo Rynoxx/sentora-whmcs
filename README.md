@@ -23,13 +23,13 @@ ZPanel Module: [Knivey](https://github.com/knivey/)
 ## Requirements ##
 [WHMCS](http://whmcs.com/ "WHMCS Website") installed (doesn't have to be on the same machine as the sentora installation(s))
 The WHMCS and Sentora installation running on PHP 5.4 or above  
-The Sentora module requires the following default modules to function (enabled by default): manage_clients and domains
+The Sentora module requires the following default modules to function (enabled by default): manage_clients and domains  
 
 - - -
 
 ## Installation instructions ##
 
-### Sentora ###
+### Sentora Module ###
 1. Add the repository to your Sentora installation and install the module using the following terminal commands:  
 ```
 	zppy repo add zppy.grid-servers.net
@@ -46,7 +46,7 @@ The Sentora module requires the following default modules to function (enabled b
 Instead of this.
 `module_controller::ExecuteDeleteClient($contenttags['uid']);`
 
-### WHMCS ###
+### WHMCS Module ###
 
 1. Download the whmcs.zip from your the WHMCS module in your Sentora panel Located here: `http://url.toyoursentora.tld/?module=whmcs`
 2. Extract it to the root directory of your WHMCS installation, e.g.
@@ -122,6 +122,7 @@ Instead of this.
 ### Updating the module ###
 To update the Sentora module enter the following command to your terminal:  
 ```
+	zppy update
 	zppy upgrade whmcs
 ```  
 To update the WHMCS module repeat the first two steps of the installation

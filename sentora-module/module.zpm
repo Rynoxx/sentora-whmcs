@@ -66,7 +66,12 @@
 						<tr style="margin-bottom: 4px;">
 							<td><: WHMCS Login Link :></td>
 							<td><@ WHMCSLinkForm @></td>
-							<td><p><: The link to your WHMCS login/clientarea page.<br>Must be preceeded by http:// or https:// :></p></td>
+							<td><p><: The link to your WHMCS login/clientarea page. Must be preceeded by http:// or https:// :></p></td>
+						</tr>
+						<tr style="margin-bottom: 4px; padding: 4px;">
+							<td><: WHMCS Admin Folder :></td>
+							<td><@ WHMCSAdminForm @></td>
+							<td><p><: The name of your WHMCS admin folder, relative to the path above (e.g. admin, or admin123), WITHOUT preceeding slash :></p></td>
 						</tr>
 						<table class="none">
 						<tr>
@@ -85,11 +90,11 @@
 		
 		<a href="<@ WHMCSModule @>" style="margin-bottom: 8px;"><: Download WHMCS Module :></a>
 		<p>&nbsp;</p>
-		<: After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area. Your API key you may look in your module API Key. Put 1,api key (1 is the reseller id for admin) in the whmcs server config. Anytime WHMCS accesses ZPanelX it will tell ZPanelX its current module version and a notice will be generated if the versions aren`t matching. It is up to you to update your WHMCS module when updating ZPanelX module. :></p>
+		<: After downloading extract this file to your WHMCS directory, then if needed configure the servers in your WHMCS admin area. Your API key you may look in your module API Key. Put 1,api key (1 is the reseller id for admin) in the whmcs server config. Anytime WHMCS accesses Sentora/ZPanelX it will tell Sentora/ZPanelX its current module version and a notice will be generated if the versions aren`t matching. It is up to you to update your WHMCS module when updating Sentora/ZPanelX module. :></p>
 		<pre id="api-key" style="display:none; padding: 8px; margin-top: 8px;"><@ CurrentAPIKey @></pre>
 		<button class="btn btn-primary" style="margin-top: 8px;" onclick="toggle_div_visibility('api-key');" style="margin-bottom: 16px;"><: API Key :></button><br>
 		<br>
-		<a href="<@ WHMCSLink @>/admin" class="btn btn-primary"><: Login to WHMCS :></a>
+		<a href="<@ WHMCSLink @>/<@ WHMCSAdminFolder @>" class="btn btn-primary"><: Login to WHMCS :></a>
 	<% else %>
 		<a href="<@ WHMCSLink @>/clientarea.php" class="btn btn-primary"><: Login to WHMCS :></a>
 	<% endif %>

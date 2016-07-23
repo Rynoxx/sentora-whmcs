@@ -1,5 +1,11 @@
 # Changelog #
 
+## 2.3.7 ##
+- Reverted back to custom api functions for user creation
+- Added the ability to set custom admin dir in Sentora
+- Enabled the ability to disable single domain rather than the whole account.
+- Added a basic email template for WHMCS
+
 ## 2.3.6 ##
 - Improved error messages
 

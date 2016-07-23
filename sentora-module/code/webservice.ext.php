@@ -117,9 +117,71 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
-   /****************
+	/****************
 	* Our version of manage_clients
 	****************/
+	/* REMOVE ME AS SOON AS FIX IS ADDED TO SENTORA ( https://github.com/sentora/sentora-core/pull/265 ) */
+	function DeleteClient()
+	{
+		$request_data = $this->RawXMWSToArray($this->wsdata);
+		$contenttags = $this->XMLDataToArray($request_data['content']);
+		module_controller::ExecuteDeleteClient($contenttags['uid'], empty($contenttags['moveid']) ? 1 : $contenttags['moveid']);
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', print_r($request_data, true) .  print_r($contenttags, true) . ws_xmws::NewXMLTag('uid', $contenttags['uid']) . ws_xmws::NewXMLTag('deleted', 'true'));
+		return $dataobject->getDataObject();
+	}
+
+	/**
+	* Checks if username is taken if not Creates a new client with data provided
+	* Accepts <resellerid> <username> <packageid> <groupid> <fullname> <email>
+	* Accepts <address> <postcode> <phone> <password> <sendemail> <emailsubject> <emailbody>
+	* @return type
+	*/
+	public function CreateClient()
+	{
+		$response_xml = 'unknown error';
+		$request_data = $this->XMLDataToArray($this->wsdata);
+		$ctags = $request_data['xmws']['content'];
+
+		if(!empty($ctags["whmcs_version"])) {
+			$this->checkVersion($ctags["whmcs_version"]);
+		}
+
+		$userExists = module_controller::getUserExists($ctags['username']);
+		
+		if ($userExists == false) {
+			$result = module_controller::ExecuteCreateClient(
+				$ctags['resellerid'],
+				$ctags['username'],
+				$ctags['packageid'],
+				$ctags['groupid'],
+				$ctags['fullname'],
+				$ctags['email'],
+				$ctags['address'],
+				$ctags['postcode'],
+				$ctags['phone'],
+				$ctags['password'],
+				$ctags['sendemail'],
+				$ctags['emailsubject'],
+				$ctags['emailbody']
+			);
+
+			if(module_controller::getUserExists($ctags['username'])) {
+				$response_xml = 'success';
+			} else {
+				$response_xml = "Failed to create user. Error: $result";
+			}
+		} else {
+			$response_xml = "A user already exists with that username.";
+		}
+		
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', $response_xml);
+		
+		return $dataobject->getDataObject();
+	}
 
 	public function UpdateClient()
 	{
@@ -196,6 +258,21 @@ class webservice extends ws_xmws {
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('domainid', $domainId));
+
+		return $dataobject->getDataObject();
+	}
+
+	public function UpdateDomainStatus()
+	{
+		$request_data = $this->RawXMWSToArray($this->wsdata);
+
+		$enable = ws_generic::GetTagValue('enable', $request_data['content']);
+
+		$disabled = module_controller::ExecuteUpdateDomainStatus(ws_generic::GetTagValue('uid', $request_data['content']), ws_generic::GetTagValue('domainid', $request_data['content']), $enable);
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('disabled', (bool)$enable < 1 ? "true" : "false"));
 
 		return $dataobject->getDataObject();
 	}
