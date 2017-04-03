@@ -19,10 +19,10 @@ class CurlHandler
     private $factory;
 
     /** @var array Array of curl easy handles */
-    private $handles = array();
+    private $handles = [];
 
     /** @var array Array of owned curl easy handles */
-    private $ownedHandles = array();
+    private $ownedHandles = [];
 
     /** @var int Total number of idle handles to keep in cache */
     private $maxHandles;
@@ -37,9 +37,9 @@ class CurlHandler
      *
      * @param array $options Array of options to use with the handler
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
-        $this->handles = $this->ownedHandles = array();
+        $this->handles = $this->ownedHandles = [];
         $this->factory = isset($options['handle_factory'])
             ? $options['handle_factory']
             : new CurlFactory();
@@ -57,7 +57,26 @@ class CurlHandler
         }
     }
 
+    /**
+     * @param array $request
+     *
+     * @return CompletedFutureArray
+     */
     public function __invoke(array $request)
+    {
+        return new CompletedFutureArray(
+            $this->_invokeAsArray($request)
+        );
+    }
+
+    /**
+     * @internal
+     *
+     * @param array $request
+     *
+     * @return array
+     */
+    public function _invokeAsArray(array $request)
     {
         $factory = $this->factory;
 
@@ -71,11 +90,10 @@ class CurlHandler
         $response = ['transfer_stats' => curl_getinfo($h)];
         $response['curl']['error'] = curl_error($h);
         $response['curl']['errno'] = curl_errno($h);
+        $response['transfer_stats'] = array_merge($response['transfer_stats'], $response['curl']);
         $this->releaseEasyHandle($h);
 
-        return new CompletedFutureArray(
-            CurlFactory::createResponse($this, $request, $response, $hd, $bd)
-        );
+        return CurlFactory::createResponse([$this, '_invokeAsArray'], $request, $response, $hd, $bd);
     }
 
     private function checkoutEasyHandle()
@@ -103,12 +121,12 @@ class CurlHandler
             unset($this->handles[$id], $this->ownedHandles[$id]);
         } else {
             // curl_reset doesn't clear these out for some reason
-            static $unsetValues = array(
+            static $unsetValues = [
                 CURLOPT_HEADERFUNCTION   => null,
                 CURLOPT_WRITEFUNCTION    => null,
                 CURLOPT_READFUNCTION     => null,
                 CURLOPT_PROGRESSFUNCTION => null,
-            );
+            ];
             curl_setopt_array($handle, $unsetValues);
             curl_reset($handle);
             $this->ownedHandles[$id] = false;

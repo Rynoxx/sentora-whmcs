@@ -25,7 +25,7 @@ class CurlFactory
      */
     public function __invoke(array $request, $handle = null)
     {
-        $headers = array();
+        $headers = [];
         $options = $this->getDefaultOptions($request, $headers);
         $this->applyMethod($request, $options);
 
@@ -51,7 +51,7 @@ class CurlFactory
         $body = $this->getOutputBody($request, $options);
         curl_setopt_array($handle, $options);
 
-        return array($handle, &$headers, $body);
+        return [$handle, &$headers, $body];
     }
 
     /**
@@ -80,6 +80,7 @@ class CurlFactory
             $startLine = explode(' ', array_shift($headers), 3);
             $headerList = Core::headersFromLines($headers);
             $response['headers'] = $headerList;
+            $response['version'] = isset($startLine[0]) ? substr($startLine[0], 5) : null;
             $response['status'] = isset($startLine[1]) ? (int) $startLine[1] : null;
             $response['reason'] = isset($startLine[2]) ? $startLine[2] : null;
             $response['body'] = $body;
@@ -96,13 +97,13 @@ class CurlFactory
         array $request,
         array $response
     ) {
-        static $connectionErrors = array(
+        static $connectionErrors = [
             CURLE_OPERATION_TIMEOUTED  => true,
             CURLE_COULDNT_RESOLVE_HOST => true,
             CURLE_COULDNT_CONNECT      => true,
             CURLE_SSL_CONNECT_ERROR    => true,
             CURLE_GOT_NOTHING          => true,
-        );
+        ];
 
         // Retry when nothing is present or when curl failed to rewind.
         if (!isset($response['err_message'])
@@ -125,13 +126,13 @@ class CurlFactory
             ? new ConnectException($message)
             : new RingException($message);
 
-        return $response + array(
+        return $response + [
             'status'  => null,
             'reason'  => null,
             'body'    => null,
-            'headers' => array(),
+            'headers' => [],
             'error'   => $error,
-        );
+        ];
     }
 
     private function getOutputBody(array $request, array &$options)
@@ -158,7 +159,7 @@ class CurlFactory
         $url = Core::url($request);
         $startingResponse = false;
 
-        $options = array(
+        $options = [
             '_headers'             => $request['headers'],
             CURLOPT_CUSTOMREQUEST  => $request['http_method'],
             CURLOPT_URL            => $url,
@@ -177,10 +178,16 @@ class CurlFactory
                 }
                 return strlen($h);
             },
-        );
+        ];
 
         if (isset($request['version'])) {
-            $options[CURLOPT_HTTP_VERSION] = $request['version'] == 1.1 ? CURL_HTTP_VERSION_1_1 : CURL_HTTP_VERSION_1_0;
+            if ($request['version'] == 2.0) {
+                $options[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_2_0;
+            } else if ($request['version'] == 1.1) {
+                $options[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
+            } else {
+                $options[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_0;
+            }
         }
 
         if (defined('CURLOPT_PROTOCOLS')) {
@@ -310,7 +317,7 @@ class CurlFactory
      */
     private function applyCustomCurlOptions(array $config, array $options)
     {
-        $curlOptions = array();
+        $curlOptions = [];
         foreach ($config as $key => $value) {
             if (is_int($key)) {
                 $curlOptions[$key] = $value;
@@ -388,6 +395,13 @@ class CurlFactory
             case 'save_to':
 
                 if (is_string($value)) {
+                    if (!is_dir(dirname($value))) {
+                        throw new \RuntimeException(sprintf(
+                            'Directory %s does not exist for save_to value of %s',
+                            dirname($value),
+                            $value
+                        ));
+                    }
                     $value = new LazyOpenStream($value, 'w+');
                 }
 
