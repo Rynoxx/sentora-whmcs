@@ -116,6 +116,9 @@
  * - Added the ability to set custom admin dir in Sentora
  * - Enabled the ability to disable single domain rather than the whole account.
  * - Added a basic email template for WHMCS
+ *
+ * 2.3.8
+ * - Fixes issue with package upgrade
  */
 
 /*
@@ -141,7 +144,7 @@ use Ballen\Senitor\Entities\MessageBag;
 $xmws = null;
 
 function getModuleVersion(){
-	return '237';
+	return '238';
 }
 
 function sentora_ConfigOptions() {
