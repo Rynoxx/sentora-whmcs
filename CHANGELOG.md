@@ -1,5 +1,8 @@
 # Changelog #
 
+## 2.3.8 ##
+- Fixes issue with package upgrade
+
 ## 2.3.7 ##
 - Reverted back to custom api functions for user creation
 - Added the ability to set custom admin dir in Sentora
