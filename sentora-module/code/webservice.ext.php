@@ -13,28 +13,28 @@ class webservice extends ws_xmws {
 
    /*
 	* todo
-	* 
+	*
 	* release:
-	* 
+	*
 	* add a version check for the whmcs' module
 	* could add a new api call to all whmcs function to tell ZPanelX it's version
 	* perhaps even have an option to send email to admin
-	* 
+	*
 	* add a user page that will link them to their whmcs clientarea
-	* 
+	*
 	* add a serveradmin page to provide download & instructions for setting up whmcs side
-	* 
+	*
 	* possibly add a table to track which users are setup through whmcs
-	* 
+	*
 	* Future:
-	* 
+	*
 	* add ssl support (SSL support done (but not tested))
 	* and provide a guide on how to setup ZPanelX for ssl
-	* 
+	*
 	* add option on whmcs for if remote logins (csfr disabled) on ZPanelX and explain
 	* why this is a bad idea (Warning running ZPanelX with remote logins enabled is a security
 	* vulnerability) ^ actually might be best not to support this to discourage
-	* 
+	*
 	* test reseller support
 	*/
 
@@ -56,7 +56,7 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$uid = module_controller::getUserId($ctags['username']);
 		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('uid', $uid));
-		
+
 		return $dataobject->getDataObject();
 	}
 
@@ -72,7 +72,7 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$pid = module_controller::getPackageIdFix($ctags['packagename']);
 		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('packageid', $pid));
-		
+
 		return $dataobject->getDataObject();
 	}
 
@@ -93,7 +93,7 @@ class webservice extends ws_xmws {
 
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
-		
+
 		if((int)$version != (int)$whmcs_version) {
 			$dataobject->addItemValue('content', ws_xmws::NewXMLTag('pass', 'false'));
 			//check database if this is first time
@@ -149,7 +149,7 @@ class webservice extends ws_xmws {
 		}
 
 		$userExists = module_controller::getUserExists($ctags['username']);
-		
+
 		if ($userExists == false) {
 			$result = module_controller::ExecuteCreateClient(
 				$ctags['resellerid'],
@@ -175,11 +175,11 @@ class webservice extends ws_xmws {
 		} else {
 			$response_xml = "A user already exists with that username.";
 		}
-		
+
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response_xml);
-		
+
 		return $dataobject->getDataObject();
 	}
 
@@ -191,29 +191,31 @@ class webservice extends ws_xmws {
 		if(!empty($ctags["whmcs_version"]))	{
 			$this->checkVersion($ctags["whmcs_version"]);
 		}
-			$response_xml = module_controller::ExecuteUpdateClient(
-				$ctags['uid'],
-				$ctags['packageid'],
-				'1',
-				$ctags['groupid'],
-				$ctags['fullname'],
-				$ctags['email'],
-				$ctags['address'],
-				$ctags['postcode'],
-				$ctags['phone'],
-				$ctags['password']);
 
-		if ($response_xml == true)
+		$response_xml = module_controller::ExecuteUpdateClient(
+			$ctags['uid'],
+			$ctags['packageid'],
+			'1',
+			$ctags['groupid'],
+			$ctags['fullname'],
+			$ctags['email'],
+			$ctags['address'],
+			$ctags['postcode'],
+			$ctags['phone'],
+			$ctags['password']
+		);
+
+		if ($response_xml === true)
 		{
 			$response_xml = "success";
 		} else {
 			$response_xml = empty($response_xml) ? "Can't update user." : $response_xml;
 		}
-		
+
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response_xml);
-		
+
 		return $dataobject->getDataObject();
 	}
 
@@ -224,13 +226,13 @@ class webservice extends ws_xmws {
 		if(!empty($ctags["whmcs_version"]))	{
 			$this->checkVersion($ctags["whmcs_version"]);
 		}
-		
+
 		$response_xml = ctrl_users::CheckUserEmailIsUnique($ctags['email']) ? "true" : "false";
 
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response_xml);
-		
+
 		return $dataobject->getDataObject();
 	}
 

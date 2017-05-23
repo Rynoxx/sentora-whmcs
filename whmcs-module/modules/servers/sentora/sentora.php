@@ -15,7 +15,7 @@
  *	Fixed for version zPanel 10.0.1 CentOS Linux
  *	Tested with WHMCS 5.1.2 and Linux CentOS 6.3
  *	Read the readme file for more details
- * 	
+ *
  *
  *
  * TODO:
@@ -91,7 +91,7 @@
  * - Included some ZPanelX compatability updates from MarkDark [Source](http://forums.sentora.org/showthread.php?tid=1563&pid=12786#pid12786)
  * - Changes to the ZPanelX compatability updates to ensure a more "neutral" use of ZPanelX/Sentora in comments while showing the one which is relevant for the currently installed panel.
  * - Translation updates.
- * 
+ *
  * 2.3.2
  * - Fixed #2
  *
@@ -288,7 +288,7 @@ function sendSenitorRequest($params, $module, $endpoint, $array_data = array(), 
 
 	if(empty($params["server"]) || empty($serverHostname)){
 		$logOutput = $params["server"] ? (
-				"The server has no IP or hostname configured." . 
+				"The server has no IP or hostname configured." .
 				"\nServer ID:" . $params["serverid"] .
 				"\nServer Secure: " . $params["serversecure"] .
 				"\nServer Hostname: " . $params["serverhostname"] .
@@ -684,16 +684,9 @@ function sentora_ChangePackage($params) {
 	$clientsdetails = $params["clientsdetails"];     # Array of clients details - firstname, lastname, email, country, etc...
 	// Product option
 	$groupid = "3"; # Default to Client no need to have an else statement for this.
-	if ($params["configoption2"] == "yes" || strpos($producttype, "reseller") >= 0){
+	if ($params["configoption2"] === "on" || stripos($producttype, "reseller") !== false){
 		$groupid = "2";
 	}
-
-	// Server details
-	$serverusername = $params["serverusername"];    # Server username
-	$serverpassword = $params["serverpassword"];    # Server password
-	$serveraccesshash = explode(",", $params["serveraccesshash"]);
-	$server_reseller = $serveraccesshash[0];      # Get the Reseller ID
-	$server_apikey = $serveraccesshash[1];      # Get the API Key
 
 	//Get the UID
 	$uid = getUserID($params);
@@ -707,18 +700,18 @@ function sentora_ChangePackage($params) {
 		"packageid" => $params["configoption1"],
 		"groupid" => $groupid,
 		"uid" => $uid,
-		"fullname" => $clientsdetails['firstname'] . " " . $clientsdetails['lastname'] or "",
-		"email" => $clientsdetails['email'] or "",
-		"address" => $clientsdetails['address1'] or "",
-		"postcode" => $clientsdetails['postcode'] or "",
-		"password" => $password or "",
-		"phone" => $clientsdetails['phonenumber'] or ""
+		"fullname" => empty(trim($clientsdetails['firstname'] . " " . $clientsdetails['lastname'])) ? "" : $clientsdetails['firstname'] . " " . $clientsdetails['lastname'],
+		"email" => $clientsdetails['email'],
+		"address" => $clientsdetails['address1'],
+		"postcode" => $clientsdetails['postcode'],
+		"password" => empty($password) ? "" : $password,
+		"phone" => $clientsdetails['phonenumber']
 	);
 
 	$response = sendSenitorRequest($params, "whmcs", "UpdateClient", $data);
 
-	$response_array = $response->asArray();
-	return $response_array;
+	$content = $response->asString();
+	return $content;
 }
 
 function sentora_ClientArea($params) {
@@ -779,10 +772,10 @@ function sentora_UsageUpdate($params) {
 		 * NOTICE In the whmcs api doc disklimit is shown as dislimit in mysql it is really disklimit
 		 * also diskused is really diskusage
 		 * also bwused is really bwusage
-		 * 
+		 *
 		 * not sure if these are changes from another whmcs version
 		 *  but i'm using the latest whmcs and thats what they are now
-		 * 
+		 *
 		 * All values should be in MB
 		 */
 		foreach ($xmws_clients as $xmws_client) {

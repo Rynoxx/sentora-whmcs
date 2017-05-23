@@ -29,7 +29,7 @@ class module_controller
 	static $clientid;
 	static $clientpkgid;
 	static $resetform;
-	
+
    /***********************************************************
 	* Begin functions for WebPage
 	***********************************************************/
@@ -37,7 +37,7 @@ class module_controller
    /**
 	* Get our module name
 	* @return string name of the current module
-	*/	 
+	*/
 	static function getModuleName()
 	{
 		$module_name = ui_language::translate(ui_module::GetModuleName());
@@ -48,7 +48,7 @@ class module_controller
 	* Get our icon path + filename
 	* @global type $controller
 	* @return string path to the icon file
-	*/	
+	*/
 	static function getModuleIcon()
 	{
 		global $controller;
@@ -70,7 +70,7 @@ class module_controller
 
    /**
 	* Returns our module description
-	* @return string the module description from the database (originally improted from the module.xml file). 
+	* @return string the module description from the database (originally improted from the module.xml file).
 	*/
 	static function getModuleDesc()
 	{
@@ -87,7 +87,7 @@ class module_controller
 	{
 		return runtime_csfr::Token();
 	}
-	 
+
    /**
 	* Retrieves the current API key from the options
 	* @author Bobby Allen (ballen@zpanelcp.com)
@@ -101,7 +101,7 @@ class module_controller
    /**
 	* Checks if there is a bad version notice set
 	*/
-	static function getBadVersionIsSet() 
+	static function getBadVersionIsSet()
 	{
 		$whmcs_version = self::getBadVersion();
 		if($whmcs_version == 'false') {
@@ -166,7 +166,7 @@ class module_controller
 		if(!self::getIsAdmin()) {
 			return false;
 		}
-		
+
 		ctrl_options::SetSystemOption('whmcs_sendemail_bo', $form['SendEmail']);
 		ctrl_options::SetSystemOption('whmcs_reseller_view_api', $form['ResellerViewAPI']);
 		ctrl_options::SetSystemOption('whmcs_link', $form['Link']);
@@ -352,7 +352,7 @@ class module_controller
 		}
 	}
 
-	
+
 	static function ExecuteUpdateClient($clientid, $package, $enabled, $group, $fullname, $email, $address, $post, $phone, $newpass)
 	{
 		global $zdbh;
@@ -364,29 +364,32 @@ class module_controller
 		if ($enabled == 0) {
 			runtime_hook::Execute('OnBeforeDisableClient');
 		}
+
 		if ($enabled == 1) {
 			runtime_hook::Execute('OnBeforeEnableClient');
 		}
+
 		if ($newpass != "") {
 
-		// Check for password length...
-		if (strlen($newpass) < ctrl_options::GetSystemOption('password_minlength')) {
-			self::$badpassword = true;
-			return false;
-		}
-		
-		$crypto = new runtime_hash;
-		$crypto->SetPassword($newpass);
-		$randomsalt = $crypto->RandomSalt();
-		$crypto->SetSalt($randomsalt);
-		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
+			// Check for password length...
+			if (strlen($newpass) < ctrl_options::GetSystemOption('password_minlength')) {
+				self::$badpassword = true;
+				return "The users password is too short";
+			}
 
-		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_pass_vc=:newpass, ac_passsalt_vc=:passsalt WHERE ac_id_pk=:clientid");
-		$sql->bindParam(':clientid', $clientid);
-		$sql->bindParam(':newpass', $secure_password);
-		$sql->bindParam(':passsalt', $randomsalt);
-		$sql->execute();
+			$crypto = new runtime_hash;
+			$crypto->SetPassword($newpass);
+			$randomsalt = $crypto->RandomSalt();
+			$crypto->SetSalt($randomsalt);
+			$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
+
+			$sql = $zdbh->prepare("UPDATE x_accounts SET ac_pass_vc=:newpass, ac_passsalt_vc=:passsalt WHERE ac_id_pk=:clientid");
+			$sql->bindParam(':clientid', $clientid);
+			$sql->bindParam(':newpass', $secure_password);
+			$sql->bindParam(':passsalt', $randomsalt);
+			$sql->execute();
 		}
+
 		$sql = $zdbh->prepare("UPDATE x_accounts SET ac_email_vc=:email, ac_package_fk=:package, ac_enabled_in=:isenabled, ac_group_fk=:group WHERE ac_id_pk =:clientid");
 		$sql->bindParam(':email', $email);
 		$sql->bindParam(':package', $package);
@@ -404,7 +407,7 @@ class module_controller
 		$sql->bindParam(':phone', $phone);
 		$sql->bindParam(':accountid', $clientid);
 		$sql->execute();
-			
+
 		if ($enabled == 0) {
 			runtime_hook::Execute('OnAfterDisableClient');
 		}
@@ -471,7 +474,7 @@ class module_controller
 
 			return ui_language::translate("Failed the check for valid parameters. ") . $errormsg;
 		}
-		
+
 		runtime_hook::Execute('OnBeforeCreateClient');
 
 		$crypto = new runtime_hash;
@@ -480,7 +483,7 @@ class module_controller
 		$crypto->SetSalt($randomsalt);
 		$secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
 		$time = time();
-		
+
 		// No errors found, so we can add the user to the database...
 		$sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts) VALUES (:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :uid, :time)");
 		$sql->bindParam(':uid', $uid);
@@ -687,7 +690,7 @@ class module_controller
 		$stmt->execute();
 		$rows = $stmt->fetch(PDO::FETCH_ASSOC);
 		$numrows = $rows['count'];
-		
+
 		if ($numrows == 0) {
 			return false;
 		} else {
@@ -743,7 +746,7 @@ class module_controller
 	 * Our version of dns_manager
 	 *****************************/
 
-	/** 
+	/**
 	 *
 	 * NOTE: Unchanged from original.
 	 * @param int $id The domain ID
